@@ -179,3 +179,12 @@ if (document.readyState === 'loading') {
     init();
 }
 
+// Force Android Service Worker update checks when app comes to foreground
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.update();
+        });
+    }
+});
+
