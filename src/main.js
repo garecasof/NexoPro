@@ -107,19 +107,17 @@ async function init() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        console.log('✨ beforeinstallprompt event fired');
         e.preventDefault();
-        // Stash the event so it can be triggered later.
         deferredPrompt = e;
-        // Update UI notify the user they can add to home screen
         window.installPromptActive = true;
+
         const installBtn = document.getElementById('btn-install-nav');
         if (installBtn) {
             installBtn.style.display = 'flex';
             installBtn.onclick = async () => {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
                 if (outcome === 'accepted') {
                     installBtn.style.display = 'none';
                     window.installPromptActive = false;
@@ -129,19 +127,30 @@ async function init() {
         }
     });
 
-    // Handle install button click for iOS (manual instructions)
+    // Handle install button click for iOS or Manual Fallback
     document.addEventListener('click', (e) => {
-        if (e.target.closest('#btn-install-nav') && isIOS && !deferredPrompt) {
-            import('./lib/toast.js').then(({ showToast }) => {
-                showToast('📱 En iPhone: toca el icono de Compartir y luego "Agregar a inicio"', 'success');
-            });
+        const btn = e.target.closest('#btn-install-nav');
+        if (btn) {
+            if (isIOS && !deferredPrompt) {
+                import('./lib/toast.js').then(({ showToast }) => {
+                    showToast('📱 En iPhone: toca el icono de Compartir y luego "Agregar a inicio"', 'success');
+                });
+            } else if (!deferredPrompt && !isStandalone) {
+                // On Desktop Chrome, some versions don't show the prompt if it was already dismissed
+                import('./lib/toast.js').then(({ showToast }) => {
+                    showToast('💡 Buscá el icono de instalación en la barra de direcciones del navegador', 'success');
+                });
+            }
         }
     });
 
-    // Special help for iOS users (console log for now)
+    // On iOS, we show it manually since they don't have the beforeinstallprompt event
     if (isIOS && !isStandalone) {
-        const installBtn = document.getElementById('btn-install-nav');
-        if (installBtn) installBtn.style.display = 'flex'; // Force show on iOS to show manual toast
+        window.installPromptActive = true;
+        setTimeout(() => {
+            const installBtn = document.getElementById('btn-install-nav');
+            if (installBtn) installBtn.style.display = 'flex';
+        }, 1000);
     }
 
     // Hide splash screen after a brief delay
