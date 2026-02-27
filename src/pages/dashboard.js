@@ -147,12 +147,21 @@ export async function renderDashboard() {
   if (toggleVis) {
     toggleVis.addEventListener('change', async (e) => {
       const isActive = e.target.checked;
-      const { error } = await updateProfile(user.id, { is_active: isActive });
-      if (error) {
-        showToast('❌ Error al cambiar visibilidad', 'error');
-        e.target.checked = !isActive; // revert
-      } else {
-        showToast(isActive ? '✅ Perfil visible para clientes' : '⚠️ Perfil oculto', isActive ? 'success' : '');
+      console.log('🔄 Toggle visibilidad:', { userId: user.id, isActive });
+      try {
+        const result = await updateProfile(user.id, { is_active: isActive });
+        console.log('📦 Resultado updateProfile:', JSON.stringify(result));
+        if (result.error) {
+          console.error('❌ Error Supabase:', JSON.stringify(result.error));
+          showToast('❌ Error al cambiar visibilidad: ' + (result.error.message || 'desconocido'), 'error');
+          e.target.checked = !isActive; // revert
+        } else {
+          showToast(isActive ? '✅ Perfil visible para clientes' : '⚠️ Perfil oculto', isActive ? 'success' : '');
+        }
+      } catch (err) {
+        console.error('💥 Excepción en toggle:', err);
+        showToast('❌ Error inesperado: ' + err.message, 'error');
+        e.target.checked = !isActive;
       }
     });
   }
