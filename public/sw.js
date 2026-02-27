@@ -1,5 +1,5 @@
 // NexoPro — Service Worker (PWA offline básico)
-const CACHE_NAME = 'nexopro-v4';
+const CACHE_NAME = 'nexopro-v5'; // <-- Incrementado a v5 por el cambio a 3 columnas
 const PRECACHE_URLS = [
     '/',
     '/index.html',
@@ -7,17 +7,19 @@ const PRECACHE_URLS = [
     '/src/main.js'
 ];
 
-// Install: cachear recursos esenciales
+// Install: cachear recursos esenciales y forzar instalación
 self.addEventListener('install', (event) => {
+    // skipWaiting() fuerza a este nuevo SW a activarse inmediatamente, 
+    // reemplazando a cualquier SW viejo que estuviera en ejecución.
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(PRECACHE_URLS);
         })
     );
-    self.skipWaiting();
 });
 
-// Activate: limpiar caches viejos
+// Activate: limpiar caches viejos y tomar control inmediato
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
@@ -26,6 +28,8 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
+    // clients.claim() hace que el SW tome control de todas las páginas abiertas 
+    // inmediatamente, sin esperar a un reload.
     self.clients.claim();
 });
 
