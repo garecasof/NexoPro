@@ -1,8 +1,28 @@
 // NexoPro — Open Graph API (Vercel Serverless Function)
-// Serves rich previews for WhatsApp, Facebook, Twitter, etc.
+const https = require('https');
 
 const SUPABASE_URL = 'https://dsdvjpdacezgmqlozzei.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_jHULIs_rMehwQA5sGQ4j4w_C-aa4pZG';
+
+function supabaseGet(path) {
+    return new Promise((resolve, reject) => {
+        const url = `${SUPABASE_URL}${path}`;
+        const options = {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+        };
+        https.get(url, options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+                try { resolve(JSON.parse(data)); }
+                catch (e) { reject(e); }
+            });
+        }).on('error', reject);
+    });
+}
 
 function escapeHtml(str) {
     return (str || '')
@@ -41,52 +61,48 @@ module.exports = async function handler(req, res) {
     const { id } = req.query;
 
     if (!id) {
-        return res.status(400).json({ error: 'Missing id parameter' });
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.status(200).send(buildHTML({
+            title: 'NexoPro — Tu directorio de profesionales',
+            description: 'Encontra al profesional que necesitas cerca tuyo.',
+            image: '',
+            url: 'https://nexo-pro.vercel.app',
+        }));
     }
 
     try {
-        const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/profiles?id=eq.${id}&select=*,categories(name,icon)`,
-            {
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-            }
-        );
-
-        const data = await response.json();
-        const pro = data?.[0];
+        const data = await supabaseGet(`/rest/v1/profiles?id=eq.${id}&select=*,categories(name,icon)`);
+        const pro = data && data[0];
 
         if (!pro) {
-            return res.status(404).send(buildHTML({
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            return res.status(200).send(buildHTML({
                 title: 'NexoPro — Tu directorio de profesionales',
-                description: 'Encontrá al profesional que necesitás cerca tuyo.',
+                description: 'Encontra al profesional que necesitas cerca tuyo.',
                 image: '',
-                url: `https://${req.headers.host || 'nexo-pro.vercel.app'}`,
+                url: 'https://nexo-pro.vercel.app',
             }));
         }
 
-        const categoryName = pro.categories?.name || 'Profesional';
-        const categoryIcon = pro.categories?.icon || '';
+        const categoryName = (pro.categories && pro.categories.name) || 'Profesional';
         const city = pro.address ? pro.address.split(',').pop().trim() : '';
 
-        const title = `${pro.full_name} — ${categoryName}`;
-        const description = `⭐ ${pro.rating || 0}/5 · ${categoryIcon} ${categoryName}${city ? ` · 📍 ${city}` : ''} — ${pro.description || 'Encontralo en NexoPro'}`;
+        const title = pro.full_name + ' — ' + categoryName;
+        const description = 'Rating ' + (pro.rating || 0) + '/5 - ' + categoryName + (city ? ' - ' + city : '') + ' - ' + (pro.description || 'Encontralo en NexoPro');
         const image = pro.photo_url || '';
-        const url = `https://${req.headers.host || 'nexo-pro.vercel.app'}/#/profile?id=${id}`;
+        const url = 'https://nexo-pro.vercel.app/#/profile?id=' + id;
 
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
         return res.status(200).send(buildHTML({ title, description, image, url }));
 
     } catch (err) {
-        console.error('OG Error:', err);
-        return res.status(500).send(buildHTML({
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.status(200).send(buildHTML({
             title: 'NexoPro — Tu directorio de profesionales',
-            description: 'Encontrá al profesional que necesitás cerca tuyo.',
+            description: 'Encontra al profesional que necesitas cerca tuyo.',
             image: '',
-            url: `https://${req.headers.host || 'nexo-pro.vercel.app'}`,
+            url: 'https://nexo-pro.vercel.app',
         }));
     }
 };
