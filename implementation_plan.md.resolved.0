@@ -1,0 +1,37 @@
+# Plan de Implementación - NexoPro (MVP)
+
+Este plan detalla los pasos para construir la primera versión funcional de NexoPro, el hub de servicios profesionales.
+
+## Objetivos del MVP
+- Permitir que los profesionales se registren con sus datos básicos.
+- Permitir que los clientes busquen profesionales por categoría y ubicación.
+- Facilitar el contacto directo vía WhatsApp.
+
+## Cambios Propuestos
+
+### Módulos del Sistema
+
+#### [NEW] Backend (API/Database)
+- Configuración de base de datos (PostgreSQL/MongoDB o Firebase para rapidez).
+- Modelos de datos: `User` (Profesional), `Service`, `Category`, `Review`.
+- API Endpoints:
+  - `POST /register`: Registro de profesionales.
+  - `GET /services`: Búsqueda con filtros de categoría y ubicación.
+  - `GET /professionals/:id`: Detalle del perfil.
+
+#### [NEW] Frontend (Mobile App - React Native / Flutter)
+- **Pantalla de Inicio:** Buscador principal y categorías destacadas.
+- **Pantalla de Resultados:** Listado de profesionales con filtros.
+- **Pantalla de Perfil:** Información detallada, botón de WhatsApp y Mapa.
+- **Pantalla de Registro:** Formulario amigable para profesionales.
+
+## Plan de Verificación
+
+### Pruebas Automatizadas
+- **API Tests:** Ejecutar `npm test` (o similar) para validar los endpoints de registro y búsqueda.
+- **UI Tests:** Validar que los botones de navegación y el botón de WhatsApp funcionen correctamente.
+
+### Verificación Manual
+1. **Flujo del Profesional:** Registrar un usuario nuevo con el nombre "Test Pro", verificar que aparezca en la búsqueda.
+2. **Flujo del Cliente:** Abrir el perfil del "Test Pro" y hacer clic en el botón de WhatsApp para verificar la redirección.
+3. **Filtros:** Buscar por "Médico" y verificar que solo aparezcan resultados de esa categoría.
