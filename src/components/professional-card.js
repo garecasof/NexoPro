@@ -78,7 +78,7 @@ export function renderProfessionalListCard(pro, userLocation = null) {
 
       <!-- WhatsApp -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:2px;align-self:center;">
-        <a href="https://wa.me/${pro.whatsapp}" target="_blank" onclick="event.stopPropagation()"
+        <a href="https://wa.me/${(pro.whatsapp || '').replace(/\\D/g, '')}" target="_blank" onclick="event.stopPropagation()"
           style="display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;
           background:#25D366;color:white;text-decoration:none;box-shadow:0 2px 8px rgba(37,211,102,0.4);
           transition:transform .15s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"

@@ -126,8 +126,14 @@ export async function renderLogin(params = {}) {
     try {
       if (isRegister) {
         const name = document.getElementById('reg-name').value;
-        const whatsapp = document.getElementById('reg-whatsapp').value;
+        const rawWhatsapp = document.getElementById('reg-whatsapp').value;
         const categoryId = document.getElementById('reg-category').value;
+
+        // Limpiar número (solo dígitos) y auto-agregar prefijo de Argentina si falta
+        let cleanWa = rawWhatsapp.replace(/\D/g, '');
+        if (cleanWa && !cleanWa.startsWith('54') && cleanWa.length >= 10) {
+          cleanWa = '549' + cleanWa;
+        }
 
         const { signUp, createProfile } = await import('../lib/supabase.js');
         const { data, error } = await signUp(email, password, { full_name: name });
@@ -145,8 +151,8 @@ export async function renderLogin(params = {}) {
             id: data.user.id,
             full_name: name,
             category_id: categoryId,
-            whatsapp: whatsapp,
-            phone: '+' + whatsapp,
+            whatsapp: cleanWa,
+            phone: '+' + cleanWa,
             description: '',
             is_active: true,
           });

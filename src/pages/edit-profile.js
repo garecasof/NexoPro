@@ -235,12 +235,19 @@ export async function renderEditProfile() {
     const mainCatVal = document.getElementById('ep-category').value;
     const finalCategoryId = specialtyVal || mainCatVal;
 
+    const rawWhatsapp = document.getElementById('ep-whatsapp').value;
+    // Limpiar número (solo dígitos) y auto-agregar prefijo de Argentina si falta
+    let cleanWa = rawWhatsapp.replace(/\D/g, '');
+    if (cleanWa && !cleanWa.startsWith('54') && cleanWa.length >= 10) {
+      cleanWa = '549' + cleanWa;
+    }
+
     const updates = {
       full_name: document.getElementById('ep-name').value,
       category_id: finalCategoryId,
       description: document.getElementById('ep-desc').value,
-      whatsapp: document.getElementById('ep-whatsapp').value,
-      phone: '+' + document.getElementById('ep-whatsapp').value,
+      whatsapp: cleanWa,
+      phone: '+' + cleanWa,
       address: document.getElementById('ep-address').value,
       license_number: document.getElementById('ep-license').value || null,
       updated_at: new Date().toISOString()
