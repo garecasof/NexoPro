@@ -129,11 +129,9 @@ export async function renderLogin(params = {}) {
         const rawWhatsapp = document.getElementById('reg-whatsapp').value;
         const categoryId = document.getElementById('reg-category').value;
 
-        // Limpiar número (solo dígitos) y auto-agregar prefijo de Argentina si falta
-        let cleanWa = rawWhatsapp.replace(/\D/g, '');
-        if (cleanWa && !cleanWa.startsWith('54') && cleanWa.length >= 10) {
-          cleanWa = '549' + cleanWa;
-        }
+        // Limpiar número y usar detección de país por IP (phone.js)
+        const { formatWhatsAppNumber } = await import('../lib/phone.js');
+        const cleanWa = await formatWhatsAppNumber(rawWhatsapp);
 
         const { signUp, createProfile } = await import('../lib/supabase.js');
         const { data, error } = await signUp(email, password, { full_name: name });
