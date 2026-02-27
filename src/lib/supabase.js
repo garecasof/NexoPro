@@ -221,11 +221,10 @@ export async function createProfile(profileData) {
 export async function updateProfile(id, updates) {
     if (!supabase) return { error: { message: 'Supabase no conectado' } };
 
-    // Usamos upsert para insertarlo si por alguna razón no se creó al registrarse
-    const payload = { id, ...updates };
     const { data, error } = await supabase
         .from('profiles')
-        .upsert(payload, { onConflict: 'id' })
+        .update(updates)
+        .eq('id', id)
         .select()
         .single();
 
