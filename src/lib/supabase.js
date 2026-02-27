@@ -221,14 +221,14 @@ export async function createProfile(profileData) {
 export async function updateProfile(id, updates) {
     if (!supabase) return { error: { message: 'Supabase no conectado' } };
 
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
 
-    return { data, error };
+    // No requerimos la data devuelta porque si el usuario oculta su perfil (is_active=false),
+    // Supabase tirará error de lectura en el .select() ya que la política exige is_active=true
+    return { error };
 }
 
 // ── Services API ──
