@@ -101,6 +101,49 @@ async function init() {
         console.error('Failed to initialize Supabase:', err);
     }
 
+    // ── PWA Install Logic ────────────────────────
+    let deferredPrompt;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI notify the user they can add to home screen
+        window.installPromptActive = true;
+        const installBtn = document.getElementById('btn-install-nav');
+        if (installBtn) {
+            installBtn.style.display = 'flex';
+            installBtn.onclick = async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                    window.installPromptActive = false;
+                }
+                deferredPrompt = null;
+            };
+        }
+    });
+
+    // Handle install button click for iOS (manual instructions)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#btn-install-nav') && isIOS && !deferredPrompt) {
+            import('./lib/toast.js').then(({ showToast }) => {
+                showToast('📱 En iPhone: toca el icono de Compartir y luego "Agregar a inicio"', 'success');
+            });
+        }
+    });
+
+    // Special help for iOS users (console log for now)
+    if (isIOS && !isStandalone) {
+        const installBtn = document.getElementById('btn-install-nav');
+        if (installBtn) installBtn.style.display = 'flex'; // Force show on iOS to show manual toast
+    }
+
     // Hide splash screen after a brief delay
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
