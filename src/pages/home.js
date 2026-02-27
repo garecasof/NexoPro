@@ -49,7 +49,7 @@ export async function renderHome() {
           <h2 style="text-align:center;font-size:1.25rem;font-weight:800;color:${colors.accent};margin-bottom:14px;letter-spacing:0.5px;">
             ${group.name}
           </h2>
-          <div class="categories-grid" style="grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:10px;">
+          <div class="categories-grid" style="gap:10px;">
             ${groupCats.map(cat => renderCategoryCard(cat)).join('')}
           </div>
         </div>`;
