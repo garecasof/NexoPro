@@ -1,0 +1,26 @@
+{
+    "name": "NexoPro",
+    "short_name": "NexoPro",
+    "description": "Tu directorio integral de profesionales. Médicos, abogados, técnicos y más.",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#FFFFFF",
+    "theme_color": "#007BFF",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23007BFF'/><text x='32' y='42' text-anchor='middle' font-size='24' font-weight='bold' fill='white' font-family='sans-serif'>NP</text></svg>",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23007BFF'/><text x='32' y='42' text-anchor='middle' font-size='24' font-weight='bold' fill='white' font-family='sans-serif'>NP</text></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": [
+        "business",
+        "utilities"
+    ]
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#007BFF" />
+  <meta name="description"
+    content="NexoPro - Encontrá al profesional que necesitás. Médicos, abogados, técnicos y más, con contacto directo por WhatsApp." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NexoPro" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+  <title>NexoPro - Tu directorio de profesionales</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/src/styles/index.css" />
+</head>
+
+<body>
+  <div id="app">
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+      <div class="splash-logo">
+        <div class="splash-icon">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="30" fill="#007BFF" />
+            <path d="M20 28C20 24 24 20 32 20C40 20 44 24 44 28C44 34 38 36 32 36" stroke="white" stroke-width="3"
+              stroke-linecap="round" />
+            <circle cx="32" cy="44" r="2.5" fill="#00C853" />
+          </svg>
+        </div>
+        <h1 class="splash-title">Nexo<span>Pro</span></h1>
+        <p class="splash-subtitle">Tu directorio de profesionales</p>
+        <div class="splash-loader">
+          <div class="splash-loader-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App Container -->
+    <nav id="navbar"></nav>
+    <main id="page-content"></main>
+    <footer id="bottom-nav"></footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+  <script>
+    // Hallazgo #11: Registrar Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => { });
+      });
+    }
+  </script>
+</body>
+
+</html>
