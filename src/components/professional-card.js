@@ -54,14 +54,19 @@ export function renderProfessionalListCard(pro, userLocation = null) {
         ${fav ? '❤️' : '🤍'}
       </button>
 
-      <!-- Avatar -->
-      <div onclick="${profileLink}"
-        style="display:flex;align-items:center;justify-content:center;
-        background:${pro.photo_url ? `url('${pro.photo_url}')` : avatarBg};
-        background-size:cover;background-position:center;
-        color:white;font-size:1.2rem;font-weight:700;
-        width:60px;height:60px;min-width:60px;border-radius:14px;cursor:pointer;">
-        ${!pro.photo_url ? initials : ''}
+      <!-- Avatar & Rating Column -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div onclick="${profileLink}"
+          style="display:flex;align-items:center;justify-content:center;
+          background:${pro.photo_url ? `url('${pro.photo_url}')` : avatarBg};
+          background-size:cover;background-position:center;
+          color:white;font-size:1.2rem;font-weight:700;
+          width:60px;height:60px;min-width:60px;border-radius:14px;cursor:pointer;">
+          ${!pro.photo_url ? initials : ''}
+        </div>
+        <div style="font-size:.8rem;color:var(--text);font-weight:600;display:flex;align-items:center;gap:3px;background:var(--gray-100);padding:2px 8px;border-radius:12px;">
+          ⭐ ${pro.rating || 0}
+        </div>
       </div>
 
       <!-- Info -->
@@ -69,7 +74,6 @@ export function renderProfessionalListCard(pro, userLocation = null) {
         <div style="font-size:.78rem;font-weight:700;color:var(--primary);margin-bottom:2px;">${pro.category_name || ''}</div>
         <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;">${pro.full_name}</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.82rem;color:var(--gray-600);">
-          <span>⭐ ${pro.rating || 0}</span>
           <span>📍 ${pro.address ? pro.address.split(',').pop().trim() : 'Sin dirección'}</span>
           ${pro.is_verified ? '<span style="color:var(--accent)">✓ Verificado</span>' : ''}
           ${pro.distance != null ? `<span class="distance-badge">📌 ${formatDistance(pro.distance)}</span>` : ''}
