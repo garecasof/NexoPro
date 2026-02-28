@@ -1,6 +1,6 @@
 // NexoPro — Main Entry Point
 import { addRoute, initRouter } from './lib/router.js';
-import { initSupabase } from './lib/supabase.js';
+import { initSupabase, getSupabase } from './lib/supabase.js';
 import { renderNavbar, initNavbarScroll, initNavbarAccount } from './components/navbar.js';
 import { renderBottomNav } from './components/footer.js';
 import { renderHome } from './pages/home.js';
@@ -18,9 +18,19 @@ import { renderStats } from './pages/stats.js';
 import { renderSubcategories } from './pages/subcategories.js';
 
 // ── Layout ──────────────────────────────────────
-function updateLayout(activeTab) {
+async function updateLayout(activeTab) {
+    // Detectar si hay sesión activa para mostrar/ocultar "Mi Panel"
+    let isLoggedIn = false;
+    try {
+        const sb = getSupabase();
+        if (sb) {
+            const { data: { session } } = await sb.auth.getSession();
+            isLoggedIn = !!session;
+        }
+    } catch (e) { /* ignore */ }
+
     document.getElementById('navbar').innerHTML = renderNavbar();
-    document.getElementById('bottom-nav').innerHTML = renderBottomNav(activeTab);
+    document.getElementById('bottom-nav').innerHTML = renderBottomNav(activeTab, isLoggedIn);
     initNavbarScroll();
     initNavbarAccount();
 }
