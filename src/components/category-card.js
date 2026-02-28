@@ -8,7 +8,7 @@ export function renderCategoryCard(category) {
       onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
       onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'">
       <span style="font-size:2rem;line-height:1;">${category.icon}</span>
-      <span style="font-size:.82rem;font-weight:600;color:var(--text);text-align:center;line-height:1.2;">${category.name}</span>
+      <span style="font-size:1.05rem;font-weight:800;color:var(--text);text-align:center;line-height:1.2;letter-spacing:-0.2px;">${category.name}</span>
     </div>
   `;
 }
