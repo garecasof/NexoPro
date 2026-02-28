@@ -417,6 +417,7 @@ export const CATEGORY_GROUPS = [
     { id: 'servicios', name: '📦 Servicios Generales' },
     { id: 'inmuebles', name: '🏨 Inmuebles y Hotelería' },
     { id: 'bienestar', name: '💇 Bienestar y Estética' },
+    { id: 'comunicacion', name: '📣 Comunicación y Marketing' },
 ];
 
 export const DEMO_CATEGORIES = [
@@ -463,20 +464,20 @@ export const DEMO_CATEGORIES = [
     { id: '9', name: 'Alquileres', icon: '🏠', group: 'inmuebles' },
     { id: '10', name: 'Hotelería', icon: '🏨', group: 'inmuebles' },
 
-    // ── 🏗️ Hogar y Mantenimiento (adicionales) ──
-    { id: '31', name: 'Jardineros', icon: '🌿', group: 'hogar' },
-    { id: '32', name: 'Retiro de Escombros', icon: '🚛', group: 'hogar' },
-
     // ── 🚗 Automotor (adicionales) ──
     { id: '33', name: 'Gestor Automotor', icon: '📋', group: 'automotor' },
 
-    // ── 📦 Servicios Generales (adicionales) ──
-    { id: '34', name: 'Locución', icon: '🎙️', group: 'servicios' },
-    { id: '35', name: 'Marketing y Publicidad', icon: '📣', group: 'servicios' },
+    // ── 🏠 Hogar y Mantenimiento (adicionales) ──
+    { id: '31', name: 'Jardinería', icon: '🌿', group: 'hogar' },
+    { id: '32', name: 'Retiro de Escombros', icon: '🚛', group: 'hogar' },
 
-    // ── 💇 Bienestar y Estética (adicionales) ──
+    // ── 💇 Bienestar y Estética ──
     { id: '11', name: 'Peluquería', icon: '💇', group: 'bienestar' },
-    { id: '36', name: 'Estéticas y Uñas', icon: '💅', group: 'bienestar' },
+    { id: '36', name: 'Estética / Uñas', icon: '💅', group: 'bienestar' },
+
+    // ── 📣 Comunicación y Marketing ──
+    { id: '34', name: 'Locución', icon: '🎙️', group: 'comunicacion' },
+    { id: '35', name: 'Marketing y Publicidad', icon: '📣', group: 'comunicacion' },
 ];
 
 export const DEMO_PROFESSIONALS = [
