@@ -70,7 +70,7 @@ export function renderProfessionalListCard(pro, userLocation = null) {
         <div style="font-size:.85rem;color:#1a1a1a;font-weight:800;display:flex;align-items:center;gap:4px;
           background:#ffffff;padding:4px 12px;border-radius:20px;
           box-shadow:0 2px 8px rgba(0,0,0,0.1);border:1px solid #f1f3f5;
-          margin-top:-12px;z-index:2;cursor:default;">
+          margin-top:-6px;z-index:2;cursor:default;">
           ⭐ ${pro.rating || 0}
         </div>
       </div>
@@ -85,9 +85,6 @@ export function renderProfessionalListCard(pro, userLocation = null) {
         </div>
         
         <div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:.85rem;color:#6b7280;display:flex;align-items:center;gap:4px;">
-            📍 <span>${pro.address ? pro.address.split(',').pop().trim() : 'Sin dirección'}</span>
-          </div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             ${pro.distance != null ? `<div style="background:#EBF3FF;color:#0d6efd;padding:4px 10px;border-radius:12px;font-size:.8rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;">📌 ${formatDistance(pro.distance)}</div>` : ''}
             ${pro.is_verified ? '<div style="background:#E5FDF4;color:#059669;padding:4px 10px;border-radius:12px;font-size:.8rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;">✓ Verificado</div>' : ''}
