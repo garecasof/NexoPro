@@ -113,15 +113,21 @@ export async function renderDashboard() {
       </div>
 
       <!-- Visibility toggle -->
+      <style>
+        .toggle-switch input:checked + .toggle-track { background: var(--accent); }
+        .toggle-switch input:checked + .toggle-track .toggle-knob { transform: translateX(22px); }
+        .toggle-track { background: #ccc; }
+        .toggle-knob { transform: translateX(0); }
+      </style>
       <div style="background:var(--white);border-radius:var(--radius-md);padding:18px;margin-top:12px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:space-between;">
         <div>
-          <div style="font-size:.9rem;font-weight:600;">Perfil visible</div>
-          <div style="font-size:.75rem;color:var(--gray-500);">Los clientes pueden encontrarte.</div>
+          <div style="font-size:.9rem;font-weight:600;" id="toggle-label">Perfil ${profile.is_active !== false ? 'visible' : 'oculto'}</div>
+          <div style="font-size:.75rem;color:var(--gray-500);" id="toggle-desc">${profile.is_active !== false ? 'Los clientes pueden encontrarte.' : 'Tu perfil está oculto de las búsquedas.'}</div>
         </div>
-        <label style="position:relative;display:inline-block;width:50px;height:28px;">
-          <input type="checkbox" ${profile.is_active !== false ? 'checked' : ''} id="toggle-visibility" style="opacity:0;width:0;height:0;">
-          <span style="position:absolute;cursor:pointer;inset:0;background:var(--accent);border-radius:var(--radius-full);transition:var(--transition);">
-            <span style="position:absolute;top:3px;left:3px;width:22px;height:22px;background:white;border-radius:50%;transition:var(--transition);transform:translateX(22px);"></span>
+        <label class="toggle-switch" style="position:relative;display:inline-block;width:50px;height:28px;">
+          <input type="checkbox" ${profile.is_active !== false ? 'checked' : ''} id="toggle-visibility" style="opacity:0;width:0;height:0;position:absolute;">
+          <span class="toggle-track" style="position:absolute;cursor:pointer;inset:0;border-radius:var(--radius-full);transition:var(--transition);">
+            <span class="toggle-knob" style="position:absolute;top:3px;left:3px;width:22px;height:22px;background:white;border-radius:50%;transition:var(--transition);"></span>
           </span>
         </label>
       </div>
@@ -147,19 +153,18 @@ export async function renderDashboard() {
   if (toggleVis) {
     toggleVis.addEventListener('change', async (e) => {
       const isActive = e.target.checked;
-      console.log('🔄 Toggle visibilidad:', { userId: user.id, isActive });
       try {
         const result = await updateProfile(user.id, { is_active: isActive });
-        console.log('📦 Resultado updateProfile:', JSON.stringify(result));
         if (result.error) {
-          console.error('❌ Error Supabase:', JSON.stringify(result.error));
           showToast('❌ Error al cambiar visibilidad: ' + (result.error.message || 'desconocido'), 'error');
           e.target.checked = !isActive; // revert
         } else {
+          // Actualizar textos visualmente
+          document.getElementById('toggle-label').textContent = isActive ? 'Perfil visible' : 'Perfil oculto';
+          document.getElementById('toggle-desc').textContent = isActive ? 'Los clientes pueden encontrarte.' : 'Tu perfil está oculto de las búsquedas.';
           showToast(isActive ? '✅ Perfil visible para clientes' : '⚠️ Perfil oculto', isActive ? 'success' : '');
         }
       } catch (err) {
-        console.error('💥 Excepción en toggle:', err);
         showToast('❌ Error inesperado: ' + err.message, 'error');
         e.target.checked = !isActive;
       }
