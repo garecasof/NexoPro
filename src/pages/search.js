@@ -68,6 +68,18 @@ export async function renderSearch(params = {}) {
   let nearbyMode = false;
   let currentRadius = DEFAULT_RADIUS;
 
+  // Si el usuario ya dio permiso de ubicación previamente, la calculamos en silencio
+  try {
+    const perm = await navigator.permissions.query({ name: 'geolocation' });
+    if (perm.state === 'granted') {
+      userLocation = await getUserLocation();
+      // Agrega 'distance' a todos sin filtrar por radio (radius=0)
+      allResults = filterByProximity(allResults, userLocation.lat, userLocation.lng, 0);
+    }
+  } catch (e) {
+    // Ignorar si el navegador no soporta permissions.query
+  }
+
   function buildResultsHTML(results) {
     if (results.length > 0) {
       return `<div class="professionals-list" id="pro-results-list">
