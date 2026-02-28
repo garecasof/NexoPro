@@ -2,36 +2,36 @@
 import { fetchSubcategories, fetchCategories } from '../lib/supabase.js';
 
 export async function renderSubcategories(params = {}) {
-    const content = document.getElementById('page-content');
-    const parentId = params.id;
+  const content = document.getElementById('page-content');
+  const parentId = params.id;
 
-    // Loading state
-    content.innerHTML = `
+  // Loading state
+  content.innerHTML = `
     <div style="display:flex;justify-content:center;align-items:center;height:50vh;">
       <div style="font-size:1.5rem;animation:pulse 1.5s infinite;color:var(--primary);">Cargando especialidades...</div>
     </div>
   `;
 
-    // Fetch parent category info
-    const allCats = await fetchCategories();
-    const parent = allCats.find(c => c.id === parentId);
-    const parentName = parent ? parent.name : 'Especialidades';
-    const parentIcon = parent ? parent.icon : '📋';
+  // Fetch parent category info
+  const allCats = await fetchCategories();
+  const parent = allCats.find(c => c.id === parentId);
+  const parentName = parent ? parent.name : 'Especialidades';
+  const parentIcon = parent ? parent.icon : '📋';
 
-    // Fetch subcategories
-    const subcategories = await fetchSubcategories(parentId);
+  // Fetch subcategories
+  const subcategories = await fetchSubcategories(parentId);
 
-    if (subcategories.length === 0) {
-        // No subcategories: redirect directly to search
-        window.location.hash = `/search?category=${parentId}`;
-        return;
-    }
+  if (subcategories.length === 0) {
+    // No subcategories: redirect directly to search
+    window.location.hash = `/search?category=${parentId}`;
+    return;
+  }
 
-    content.innerHTML = `
+  content.innerHTML = `
     <div style="max-width:640px;margin:0 auto;padding:16px;">
       <!-- Header -->
       <div style="display:flex;align-items:center;margin-bottom:24px;gap:12px;">
-        <button onclick="window.location.hash='/'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text);padding:4px;">←</button>
+        <button class="btn-back" onclick="window.location.hash='/'" aria-label="Volver">←</button>
         <h1 style="margin:0;font-size:1.5rem;">${parentIcon} ${parentName}</h1>
       </div>
 

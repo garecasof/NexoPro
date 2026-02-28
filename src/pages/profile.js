@@ -1,11 +1,8 @@
 // NexoPro — Profile Page
-import { fetchProfessionalById, createPublicReview, updateReviewByToken } from '../lib/supabase.js';
+import { fetchProfessionalById, createPublicReview, updateReviewByToken, getInitials } from '../lib/supabase.js';
 import { showToast } from '../lib/toast.js';
 import { isFavorite } from '../lib/favorites.js';
-
-function getInitials(name) {
-  return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
-}
+import { loadLeaflet } from '../main.js';
 
 export async function renderProfile(params = {}) {
   const content = document.getElementById('page-content');
@@ -41,12 +38,17 @@ export async function renderProfile(params = {}) {
   const captchaAnswer = captchaA + captchaB;
 
   content.innerHTML = `
+    <!-- Back Button -->
+    <div style="padding:16px 16px 0;">
+      <button class="btn-back" onclick="history.back()" aria-label="Volver">←</button>
+    </div>
+
     <!-- Profile Header -->
     <div class="profile-header">
       <div class="profile-avatar" style="display:flex;align-items:center;justify-content:center;background:${pro.photo_url ? `url('${pro.photo_url}')` : avatarBg};background-size:cover;background-position:center;color:white;font-size:2.2rem;font-weight:800;">
         ${!pro.photo_url ? initials : ''}
       </div>
-      <h1 class="profile-name">${pro.full_name}</h1>
+      <h1 class="profile-name" style="font-size:1.5rem;">${pro.full_name}</h1>
       <p class="profile-specialty">${pro.category_name || 'Profesional'}</p>
       <div class="profile-rating">
         <span style="color:var(--star);">★</span> ${pro.rating}
@@ -390,10 +392,10 @@ export async function renderProfile(params = {}) {
     });
   }
 
-  // Initialize map
-  setTimeout(() => {
+  // Initialize map with lazy loading
+  setTimeout(async () => {
     try {
-      const L = window.L;
+      const L = await loadLeaflet();
       if (L && pro.latitude && pro.longitude) {
         const map = L.map('profile-map').setView([pro.latitude, pro.longitude], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -406,6 +408,8 @@ export async function renderProfile(params = {}) {
       }
     } catch (err) {
       console.warn('Map could not be loaded:', err);
+      const mapEl = document.getElementById('profile-map');
+      if (mapEl) mapEl.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.85rem;color:var(--gray-600);">Mapa no disponible</div>';
     }
   }, 100);
 }

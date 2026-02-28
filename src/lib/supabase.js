@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 // NexoPro — Supabase Client
-const SUPABASE_URL = 'https://dsdvjpdacezgmqlozzei.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_jHULIs_rMehwQA5sGQ4j4w_C-aa4pZG';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export function getInitials(name) {
+    if (!name) return '??';
+    return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+}
 
 let supabase = null;
 let supabaseReady = false;
@@ -16,6 +21,10 @@ export function isSupabaseReady() {
 }
 
 export async function initSupabase() {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        console.error('❌ Supabase credentials missing in .env');
+        return null;
+    }
     try {
         supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         // Test connection by fetching categories

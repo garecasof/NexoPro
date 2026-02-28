@@ -128,12 +128,16 @@ export async function renderSearch(params = {}) {
     </div>
 
     <div style="padding:0 16px 8px;">
-      <div class="filter-tabs" id="category-tabs">
-        <button class="filter-tab ${!categoryId ? 'active' : ''}" data-cat="">Todos</button>
-        ${categories.map(cat => `
-          <button class="filter-tab ${categoryId === cat.id ? 'active' : ''}" data-cat="${cat.id}">
-            ${cat.icon} ${cat.name}
-          </button>`).join('')}
+      <div class="filter-tabs-container">
+        <button class="filter-scroll-btn filter-scroll-btn-left" id="scroll-left" aria-label="Ver más a la izquierda">←</button>
+        <div class="filter-tabs" id="category-tabs">
+          <button class="filter-tab ${!categoryId ? 'active' : ''}" data-cat="">Todos</button>
+          ${categories.map(cat => `
+            <button class="filter-tab ${categoryId === cat.id ? 'active' : ''}" data-cat="${cat.id}">
+              ${cat.icon} ${cat.name}
+            </button>`).join('')}
+        </div>
+        <button class="filter-scroll-btn filter-scroll-btn-right" id="scroll-right" aria-label="Ver más a la derecha">→</button>
       </div>
     </div>
 
@@ -221,17 +225,24 @@ export async function renderSearch(params = {}) {
   searchBtn.addEventListener('click', doSearch);
   searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
-  // ── Category Filters
-  document.querySelectorAll('.filter-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const cat = tab.dataset.cat;
-      const q = searchInput.value.trim();
-      let hash = '/search';
-      const parts = [];
-      if (q) parts.push(`q=${encodeURIComponent(q)}`);
-      if (cat) parts.push(`category=${cat}`);
-      if (parts.length) hash += '?' + parts.join('&');
-      window.location.hash = hash;
-    });
-  });
+  // ── Scroll visibility logic for tabs
+  const tabsContainer = document.getElementById('category-tabs');
+  const btnL = document.getElementById('scroll-left');
+  const btnR = document.getElementById('scroll-right');
+
+  const updateScrollButtons = () => {
+    if (!tabsContainer) return;
+    const { scrollLeft, scrollWidth, clientWidth } = tabsContainer;
+    btnL.classList.toggle('visible', scrollLeft > 10);
+    btnR.classList.toggle('visible', scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  if (tabsContainer) {
+    tabsContainer.addEventListener('scroll', updateScrollButtons);
+    btnL.onclick = () => tabsContainer.scrollBy({ left: -200, behavior: 'smooth' });
+    btnR.onclick = () => tabsContainer.scrollBy({ left: 200, behavior: 'smooth' });
+    window.addEventListener('resize', updateScrollButtons);
+    // Wait for render
+    setTimeout(updateScrollButtons, 300);
+  }
 }

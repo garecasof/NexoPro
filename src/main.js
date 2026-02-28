@@ -17,6 +17,29 @@ import { renderEditLocation } from './pages/edit-location.js';
 import { renderStats } from './pages/stats.js';
 import { renderSubcategories } from './pages/subcategories.js';
 
+// Utility: Lazy Load Leaflet
+export async function loadLeaflet() {
+    if (window.L) return window.L;
+
+    // Load CSS
+    if (!document.getElementById('leaflet-css')) {
+        const link = document.createElement('link');
+        link.id = 'leaflet-css';
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+    }
+
+    // Load JS
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = () => resolve(window.L);
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
 // ── Layout ──────────────────────────────────────
 async function updateLayout(activeTab) {
     // Detectar si hay sesión activa para mostrar/ocultar "Mi Panel"
@@ -173,9 +196,7 @@ async function init() {
     }, 1500);
 
     // Load Leaflet JS
-    const leafletScript = document.createElement('script');
-    leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    document.head.appendChild(leafletScript);
+    // El router se encarga de todo. Leaflet se carga bajo demanda en las páginas que lo usan.
 
     // Start router ONLY after Supabase is ready
     initFavoriteButtons();

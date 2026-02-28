@@ -1,5 +1,6 @@
 // NexoPro — Edit Location Page
 import { getCurrentUser, fetchProfessionalById, updateLocation } from '../lib/supabase.js';
+import { loadLeaflet } from '../main.js';
 import { showToast } from '../lib/toast.js';
 
 export async function renderEditLocation() {
@@ -28,7 +29,7 @@ export async function renderEditLocation() {
   content.innerHTML = `
     <div class="form-container">
       <div style="display:flex;align-items:center;margin-bottom:24px;gap:12px;">
-        <button onclick="window.location.hash='/dashboard'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text);padding:4px;">←</button>
+        <button class="btn-back" onclick="window.location.hash='/dashboard'" aria-label="Volver">←</button>
         <h1 style="margin:0;font-size:1.5rem;">Mi Ubicación</h1>
       </div>
 
@@ -63,10 +64,10 @@ export async function renderEditLocation() {
     </div>
   `;
 
-  // Initialize Map
-  setTimeout(() => {
-    // Basic check if Leaflet is loaded
-    if (typeof L !== 'undefined') {
+  // Initialize Map with Lazy Loading
+  setTimeout(async () => {
+    try {
+      const L = await loadLeaflet();
       const map = L.map('map').setView([currentLat, currentLng], 13);
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -130,8 +131,9 @@ export async function renderEditLocation() {
         }
       });
 
-    } else {
-      document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-500);">El mapa no pudo cargar. Comprobá tu conexión.</div>';
+    } catch (e) {
+      console.error("Error cargando mapa:", e);
+      document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-600);padding:20px;text-align:center;">El mapa no pudo cargar. Comprobá tu conexión a internet e intentá de nuevo.</div>';
     }
   }, 100);
 

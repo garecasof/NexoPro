@@ -131,7 +131,7 @@ export async function renderEditReviews() {
   content.innerHTML = `
     <div class="form-container">
       <div style="display:flex;align-items:center;margin-bottom:24px;gap:12px;">
-        <button onclick="window.location.hash='/dashboard'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text);padding:4px;">←</button>
+        <button class="btn-back" onclick="window.location.hash='/dashboard'" aria-label="Volver">←</button>
         <h1 style="margin:0;font-size:1.5rem;">Mis Reseñas</h1>
       </div>
 

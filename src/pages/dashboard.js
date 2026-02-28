@@ -1,5 +1,5 @@
 // NexoPro — Dashboard Page (Panel del Profesional)
-import { getCurrentUser, fetchProfessionalById, signOut, updateProfile } from '../lib/supabase.js';
+import { getCurrentUser, fetchProfessionalById, signOut, updateProfile, getInitials } from '../lib/supabase.js';
 import { showToast } from '../lib/toast.js';
 
 export async function renderDashboard() {
@@ -31,8 +31,7 @@ export async function renderDashboard() {
     };
   }
 
-  // Get initials for avatar
-  const getInitials = (name) => name ? name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() : '';
+  // Get initials for avatar using shared utility
   const initials = getInitials(profile.full_name);
   const avatarBg = `hsl(${((profile.id || '1').charCodeAt(0) * 47) % 360}, 65%, 55%)`;
 
@@ -40,7 +39,7 @@ export async function renderDashboard() {
   content.innerHTML = `
     <!-- Dashboard Header -->
     <div class="dashboard-header" style="text-align:center;">
-      <div style="width:72px;height:72px;margin:0 auto 12px;border-radius:50%;background:${profile.photo_url ? `url('${profile.photo_url}')` : avatarBg};background-size:cover;background-position:center;color:white;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;box-shadow:var(--shadow-md); border: 2px solid white;">
+      <div class="dashboard-avatar" style="background:${profile.photo_url ? `url('${profile.photo_url}')` : avatarBg}; background-size: cover; background-position: center;">
         ${!profile.photo_url ? initials : ''}
       </div>
       <p class="dashboard-greeting">👋 ¡Bienvenido de vuelta!</p>
@@ -112,22 +111,15 @@ export async function renderDashboard() {
         <span class="dashboard-menu-arrow">→</span>
       </div>
 
-      <!-- Visibility toggle -->
-      <style>
-        .toggle-switch input:checked + .toggle-track { background: var(--accent); }
-        .toggle-switch input:checked + .toggle-track .toggle-knob { transform: translateX(22px); }
-        .toggle-track { background: #ccc; }
-        .toggle-knob { transform: translateX(0); }
-      </style>
-      <div style="background:var(--white);border-radius:var(--radius-md);padding:18px;margin-top:12px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:space-between;">
+      <div class="toggle-container">
         <div>
           <div style="font-size:.9rem;font-weight:600;" id="toggle-label">Perfil ${profile.is_active !== false ? 'visible' : 'oculto'}</div>
           <div style="font-size:.75rem;color:var(--gray-500);" id="toggle-desc">${profile.is_active !== false ? 'Los clientes pueden encontrarte.' : 'Tu perfil está oculto de las búsquedas.'}</div>
         </div>
-        <label class="toggle-switch" style="position:relative;display:inline-block;width:50px;height:28px;">
-          <input type="checkbox" ${profile.is_active !== false ? 'checked' : ''} id="toggle-visibility" style="opacity:0;width:0;height:0;position:absolute;">
-          <span class="toggle-track" style="position:absolute;cursor:pointer;inset:0;border-radius:var(--radius-full);transition:var(--transition);">
-            <span class="toggle-knob" style="position:absolute;top:3px;left:3px;width:22px;height:22px;background:white;border-radius:50%;transition:var(--transition);"></span>
+        <label class="toggle-switch">
+          <input type="checkbox" ${profile.is_active !== false ? 'checked' : ''} id="toggle-visibility">
+          <span class="toggle-track">
+            <span class="toggle-knob"></span>
           </span>
         </label>
       </div>
