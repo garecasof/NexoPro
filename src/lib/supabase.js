@@ -55,7 +55,7 @@ export async function fetchCategories() {
             .order('sort_order');
         if (!error && data.length > 0) return data;
     }
-    return DEMO_CATEGORIES.filter(c => !c.parent_id);
+    return [];
 }
 
 export async function fetchAllCategories() {
@@ -66,7 +66,7 @@ export async function fetchAllCategories() {
             .order('sort_order');
         if (!error && data.length > 0) return data;
     }
-    return DEMO_CATEGORIES;
+    return [];
 }
 
 export async function fetchSubcategories(parentId) {
@@ -145,21 +145,7 @@ export async function fetchProfessionals(filters = {}) {
             }));
         }
     }
-    // Fallback to demo data
-    let results = [...DEMO_PROFESSIONALS];
-    if (filters.category_id) {
-        results = results.filter(p => p.category_id === filters.category_id);
-    }
-    if (filters.search) {
-        const q = filters.search.toLowerCase();
-        results = results.filter(p =>
-            (p.full_name || '').toLowerCase().includes(q) ||
-            (p.description || '').toLowerCase().includes(q) ||
-            (p.category_name || '').toLowerCase().includes(q) ||
-            (p.address || '').toLowerCase().includes(q)
-        );
-    }
-    return results;
+    return [];
 }
 
 export async function fetchProfessionalById(id) {
@@ -191,7 +177,7 @@ export async function fetchProfessionalById(id) {
             };
         }
     }
-    return DEMO_PROFESSIONALS.find(p => p.id === id) || null;
+    return null;
 }
 
 export async function signUp(email, password, metadata = {}) {
