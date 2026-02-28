@@ -76,11 +76,11 @@ export function renderProfessionalListCard(pro, userLocation = null) {
       </div>
 
       <!-- Info Column -->
-      <div onclick="${profileLink}" style="flex:1;cursor:pointer;padding-top:2px;padding-right:45px;">
-        <div style="font-size:1.15rem;font-weight:800;color:#111827;margin-bottom:2px;line-height:1.2;letter-spacing:-0.3px;">
+      <div onclick="${profileLink}" style="flex:1;cursor:pointer;padding-top:2px;padding-right:45px;min-width:0;">
+        <div style="font-size:1.15rem;font-weight:800;color:#111827;margin-bottom:2px;line-height:1.2;letter-spacing:-0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
           ${pro.category_name || ''}
         </div>
-        <div style="font-size:.9rem;font-weight:600;color:#374151;margin-bottom:8px;letter-spacing:-0.1px;">
+        <div style="font-size:.9rem;font-weight:600;color:#374151;margin-bottom:8px;letter-spacing:-0.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
           ${pro.full_name}
         </div>
         
