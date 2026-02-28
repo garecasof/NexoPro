@@ -463,8 +463,20 @@ export const DEMO_CATEGORIES = [
     { id: '9', name: 'Alquileres', icon: '🏠', group: 'inmuebles' },
     { id: '10', name: 'Hotelería', icon: '🏨', group: 'inmuebles' },
 
-    // ── 💇 Bienestar y Estética ──
+    // ── 🏗️ Hogar y Mantenimiento (adicionales) ──
+    { id: '31', name: 'Jardineros', icon: '🌿', group: 'hogar' },
+    { id: '32', name: 'Retiro de Escombros', icon: '🚛', group: 'hogar' },
+
+    // ── 🚗 Automotor (adicionales) ──
+    { id: '33', name: 'Gestor Automotor', icon: '📋', group: 'automotor' },
+
+    // ── 📦 Servicios Generales (adicionales) ──
+    { id: '34', name: 'Locución', icon: '🎙️', group: 'servicios' },
+    { id: '35', name: 'Marketing y Publicidad', icon: '📣', group: 'servicios' },
+
+    // ── 💇 Bienestar y Estética (adicionales) ──
     { id: '11', name: 'Peluquería', icon: '💇', group: 'bienestar' },
+    { id: '36', name: 'Estéticas y Uñas', icon: '💅', group: 'bienestar' },
 ];
 
 export const DEMO_PROFESSIONALS = [
