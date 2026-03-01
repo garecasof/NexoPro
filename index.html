@@ -48,6 +48,28 @@
     <nav id="navbar"></nav>
     <main id="page-content"></main>
     <footer id="bottom-nav"></footer>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner" class="pwa-install-banner">
+      <div class="pwa-install-header">
+        <div class="pwa-install-icon">
+          <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 44V20L36 38V20" stroke="white" stroke-width="5" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M36 20H42.5C46.64 20 50 23.36 50 27.5C50 31.64 46.64 35 42.5 35H36" stroke="white" stroke-width="5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="pwa-install-content">
+          <div class="pwa-install-title">Instalá NexoPro</div>
+          <div class="pwa-install-desc">Más rápido, sin usar memoria y con acceso directo en tu inicio.</div>
+        </div>
+      </div>
+      <div class="pwa-install-actions">
+        <button id="pwa-dismiss-btn" class="pwa-install-btn pwa-install-secondary">Más Tarde</button>
+        <button id="pwa-accept-btn" class="pwa-install-btn pwa-install-primary">Instalar App</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

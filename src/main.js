@@ -139,51 +139,67 @@ async function init() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
+    // Check if dismissed recently (e.g., 7 days)
+    const lastDismissed = localStorage.getItem('nexo_pwa_dismissed');
+    const dismissedRecently = lastDismissed && (Date.now() - parseInt(lastDismissed)) < (7 * 24 * 60 * 60 * 1000);
+    const banner = document.getElementById('pwa-install-banner');
+    const dismissBtn = document.getElementById('pwa-dismiss-btn');
+    const acceptBtn = document.getElementById('pwa-accept-btn');
+
+    const showInstallBanner = () => {
+        // Solo mostrar si no es una app instalada y el usuario no la rechazó recientemente
+        if (!isStandalone && !dismissedRecently && banner) {
+            setTimeout(() => {
+                banner.classList.add('show');
+            }, 3000); // 3 segundos de retraso para no asustar al entrar
+        }
+    };
+
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+            banner.classList.remove('show');
+            localStorage.setItem('nexo_pwa_dismissed', Date.now().toString());
+        });
+    }
+
+    if (acceptBtn) {
+        acceptBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Flujo nativo (Android/Chrome Edge)
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    banner.classList.remove('show');
+                }
+                deferredPrompt = null;
+            } else if (isIOS) {
+                // Fallback Manual para iPhones
+                import('./lib/toast.js').then(({ showToast }) => {
+                    showToast('📱 En iPhone: tocá COMPARTIR abajo y luego "Agregar a inicio"', 'success');
+                    banner.classList.remove('show'); // Escondemos el banner para dejar ver las opciones de safari
+                });
+            } else {
+                // Fallback PC/Desktop o navegadores raros
+                import('./lib/toast.js').then(({ showToast }) => {
+                    showToast('💡 Buscá el icono de "App" en la barra de direcciones del navegador', 'success');
+                    banner.classList.remove('show');
+                });
+            }
+        });
+    }
+
+    // Chrome/Android dispara esto mágicamente cuando aprueba la "Instalabilidad"
     window.addEventListener('beforeinstallprompt', (e) => {
         console.log('✨ beforeinstallprompt event fired');
         e.preventDefault();
         deferredPrompt = e;
-        window.installPromptActive = true;
-
-        const installBtn = document.getElementById('btn-install-nav');
-        if (installBtn) {
-            installBtn.style.display = 'flex';
-            installBtn.onclick = async () => {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.style.display = 'none';
-                    window.installPromptActive = false;
-                }
-                deferredPrompt = null;
-            };
-        }
+        showInstallBanner();
     });
 
-    // Handle install button click for iOS or Manual Fallback
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('#btn-install-nav');
-        if (btn) {
-            if (isIOS && !deferredPrompt) {
-                import('./lib/toast.js').then(({ showToast }) => {
-                    showToast('📱 En iPhone: toca el icono de Compartir y luego "Agregar a inicio"', 'success');
-                });
-            } else if (!deferredPrompt && !isStandalone) {
-                // On Desktop Chrome, some versions don't show the prompt if it was already dismissed
-                import('./lib/toast.js').then(({ showToast }) => {
-                    showToast('💡 Buscá el icono de instalación en la barra de direcciones del navegador', 'success');
-                });
-            }
-        }
-    });
-
-    // On iOS, we show it manually since they don't have the beforeinstallprompt event
+    // En iOS (Safari) no existe beforeinstallprompt, así que disparamos el banner manualmente
+    // porque Apple es "especial" y usa su propio ecosistema.
     if (isIOS && !isStandalone) {
-        window.installPromptActive = true;
-        setTimeout(() => {
-            const installBtn = document.getElementById('btn-install-nav');
-            if (installBtn) installBtn.style.display = 'flex';
-        }, 1000);
+        showInstallBanner();
     }
 
     // Hide splash screen after a brief delay
