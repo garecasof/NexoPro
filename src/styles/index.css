@@ -1278,7 +1278,7 @@ ul {
   font-size: 1rem;
   font-weight: 600;
   box-shadow: var(--shadow-xl);
-  z-index: 200;
+  z-index: 3000;
   opacity: 0;
   transition: var(--transition-slow);
   max-width: calc(100vw - 32px);

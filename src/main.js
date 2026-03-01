@@ -158,10 +158,16 @@ async function init() {
         } else if (isIOS) {
             import('./lib/toast.js').then(({ showToast }) => {
                 showToast('📱 En iPhone: tocá COMPARTIR abajo y luego "Agregar a inicio"', 'success');
+                if (banner) banner.classList.remove('show');
+                const navBtn = document.getElementById('btn-install-nav');
+                if (navBtn) navBtn.style.display = 'none';
             });
         } else {
             import('./lib/toast.js').then(({ showToast }) => {
                 showToast('📱 Tocá los 3 puntitos ⋮ de tu navegador y elegí "Instalar app" o "Agregar a inicio"', 'success', 5000);
+                if (banner) banner.classList.remove('show');
+                const navBtn = document.getElementById('btn-install-nav');
+                if (navBtn) navBtn.style.display = 'none';
             });
         }
     };
