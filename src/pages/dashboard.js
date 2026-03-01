@@ -253,12 +253,10 @@ export async function renderDashboard() {
       // User avatar (Placeholder or real)
       if (profile.photo_url) {
         try {
-          // Solución de CORS para Canvas: Fetch como blob primero
-          const response = await fetch(profile.photo_url);
-          const blob = await response.blob();
-          const localUrl = URL.createObjectURL(blob);
-
           const img = new Image();
+          // Clave para evadir CORS: crossOrigin ANTES del src
+          img.crossOrigin = 'anonymous';
+
           await new Promise((resolve, reject) => {
             img.onload = () => {
               ctx.save();
@@ -275,9 +273,9 @@ export async function renderDashboard() {
               resolve();
             };
             img.onerror = reject;
-            img.src = localUrl;
+            // Clave 2: Cache-busting parameter para ignorar versiones cacheadas sin headers CORS
+            img.src = profile.photo_url + '?t=' + new Date().getTime();
           });
-          URL.revokeObjectURL(localUrl);
         } catch (e) {
           console.error("Flyer image load error:", e);
           drawFallbackAvatar();
