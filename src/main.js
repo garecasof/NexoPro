@@ -84,9 +84,9 @@ addRoute('/login', (params) => {
     renderLogin(params);
 });
 
-addRoute('/register', () => {
+addRoute('/register', (params) => {
     updateLayout('');
-    renderLogin({ mode: 'register' });
+    renderLogin({ mode: 'register', ...params });
 });
 
 addRoute('/dashboard', () => {
