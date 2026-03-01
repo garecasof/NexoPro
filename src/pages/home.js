@@ -1,6 +1,7 @@
 // NexoPro — Home Page (UX Simplificada)
 import { fetchCategories, CATEGORY_GROUPS } from '../lib/supabase.js';
 import { renderCategoryCard } from '../components/category-card.js';
+import { showToast } from '../lib/toast.js';
 
 export async function renderHome() {
   const content = document.getElementById('page-content');
@@ -55,8 +56,21 @@ export async function renderHome() {
         </div>`;
   }).join('')}
 
+    <!-- CTA for sharing -->
+    <div style="padding:0 16px 20px;">
+      <div style="background:linear-gradient(135deg, #FF6B6B, #FF8E53);border-radius:var(--radius-lg);padding:24px 20px;color:var(--white);text-align:center;box-shadow:0 8px 24px rgba(255,107,107,0.25);">
+        <div style="font-size:2.5rem;margin-bottom:8px;">📣</div>
+        <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:6px;">Ayudanos a crecer</h3>
+        <p style="font-size:.9rem;opacity:.95;margin-bottom:16px;">¿Te gusta NexoPro? Compartí la app en tus redes o con tus amigos para que más profesionales consigan trabajo.</p>
+        <button id="cta-share-app" class="btn" style="background:var(--white);color:#FF6B6B;width:100%;font-size:1rem;font-weight:800;padding:14px;border:none;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+          Compartir aplicación ❤️
+        </button>
+      </div>
+    </div>
+
     <!-- CTA for professionals -->
-    <div style="padding:12px 16px 32px;">
+    <div style="padding:0 16px 32px;">
       <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius-lg);padding:28px 20px;color:var(--white);text-align:center;">
         <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:6px;">¿Sos profesional?</h3>
         <p style="font-size:.9rem;opacity:.85;margin-bottom:16px;">Registrate gratis y empezá a recibir clientes hoy.</p>
@@ -81,4 +95,29 @@ export async function renderHome() {
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') doSearch();
   });
+
+  // Share App event
+  const shareAppBtn = document.getElementById('cta-share-app');
+  if (shareAppBtn) {
+    shareAppBtn.addEventListener('click', async () => {
+      const shareData = {
+        title: 'NexoPro — Directorio de Profesionales',
+        text: '¡Encontrá a los mejores profesionales o registrá tus servicios en NexoPro! Es 100% gratis.',
+        url: window.location.origin
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (e) { /* user cancelled */ }
+      } else {
+        // Fallback for desktop browsers that don't support Web Share API
+        try {
+          await navigator.clipboard.writeText(shareData.url);
+          showToast('📋 Link copiado para compartir', 'success');
+        } catch (e) {
+          showToast('No se pudo copiar el link', 'error');
+        }
+      }
+    });
+  }
 }
