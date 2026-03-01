@@ -142,65 +142,65 @@ async function init() {
     const banner = document.getElementById('pwa-install-banner');
     const acceptBtn = document.getElementById('pwa-accept-btn');
 
-    const showInstallBanner = () => {
-        // Solo mostrar si no es una app instalada
-        if (!isStandalone && banner) {
-            setTimeout(() => {
-                banner.classList.add('show');
-            }, 500); // Pequeño retraso para carga inicial
+    // Función centralizada para disparar la instalación nativa
+    const triggerInstall = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed successfully!');
+                // Esconder todo
+                if (banner) banner.classList.remove('show');
+                const navBtn = document.getElementById('btn-install-nav');
+                if (navBtn) navBtn.style.display = 'none';
+                window.installPromptActive = false;
+            }
+            deferredPrompt = null;
+        } else if (isIOS) {
+            import('./lib/toast.js').then(({ showToast }) => {
+                showToast('📱 En iPhone: tocá COMPARTIR abajo y luego "Agregar a inicio"', 'success');
+            });
         }
     };
 
+    // Conectar botón del banner inferior
     if (acceptBtn) {
-        acceptBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // Flujo nativo (Android/Chrome Edge)
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    banner.classList.remove('show');
-                }
-                deferredPrompt = null;
-            } else if (isIOS) {
-                // Fallback Manual para iPhones
-                import('./lib/toast.js').then(({ showToast }) => {
-                    showToast('📱 En iPhone: tocá COMPARTIR abajo y luego "Agregar a inicio"', 'success');
-                    banner.classList.remove('show'); // Escondemos el banner
-                });
-            } else {
-                // Fallback Alternativo Android: El navegador no disparó el prompt nativo
-                import('./lib/toast.js').then(({ showToast }) => {
-                    showToast('💡 Buscá "Instalar App" o "Agregar a inicio" en el menú de los 3 puntitos de tu navegador', 'success', 5000);
-                    banner.classList.remove('show');
-                });
-            }
-        });
+        acceptBtn.addEventListener('click', triggerInstall);
     }
 
-    // Chrome/Android dispara esto mágicamente cuando aprueba la "Instalabilidad"
-    // Criterios: HTTPS, Web Manifest valido, Service Worker registrado, interaccion previa en el dominio.
+    // Chrome/Android dispara esto cuando aprueba la "Instalabilidad"
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('✨ beforeinstallprompt event fired natively by Chrome!');
+        console.log('✨ beforeinstallprompt event fired!');
         e.preventDefault();
         deferredPrompt = e;
-        // Solo cuando tenemos la promesa de instalacion guardada, mostramos el boton
-        showInstallBanner();
+        window.installPromptActive = true;
+
+        // 1. Mostrar el botón verde del navbar (el que ya funcionaba)
+        const installBtn = document.getElementById('btn-install-nav');
+        if (installBtn) {
+            installBtn.style.display = 'flex';
+            installBtn.onclick = triggerInstall;
+        }
+
+        // 2. Mostrar el banner inferior también
+        if (!isStandalone && banner) {
+            setTimeout(() => banner.classList.add('show'), 1500);
+        }
     });
 
-    // En iOS (Safari) no existe beforeinstallprompt, así que disparamos el banner manualmente
+    // En iOS (Safari) no existe beforeinstallprompt
     if (isIOS && !isStandalone) {
-        showInstallBanner();
+        window.installPromptActive = true;
+        setTimeout(() => {
+            const installBtn = document.getElementById('btn-install-nav');
+            if (installBtn) {
+                installBtn.style.display = 'flex';
+                installBtn.onclick = triggerInstall;
+            }
+            if (banner) banner.classList.add('show');
+        }, 1000);
     }
 
-    // Fallback Universal: Si Chrome decide ocultar el evento nativo,
-    // mostramos de todas formas el banner visual después de 2.5 segundos. 
-    // Si tocan el botón, se usará el Toast guiado en su lugar.
-    setTimeout(() => {
-        if (!isStandalone && banner && !banner.classList.contains('show')) {
-            console.log('Forcing Install Banner visual via Universal Fallback');
-            showInstallBanner();
-        }
-    }, 2500);
 
     // Hide splash screen after a brief delay
     setTimeout(() => {
