@@ -253,14 +253,9 @@ export async function renderDashboard() {
       // User avatar (Placeholder or real)
       if (profile.photo_url) {
         try {
-          // El método que funcionó en home.js: Fetch -> Blob -> ObjectURL directo.
-          // Sin proxys raros, descargamos la imagen binaria de Supabase y creamos una URL local efímera.
-          const response = await fetch(profile.photo_url);
-          if (!response.ok) throw new Error("Fallo al descargar imagen");
-          const blob = await response.blob();
-          const localUrl = URL.createObjectURL(blob);
-
           const img = new Image();
+          // Vital para asegurar que el canvas no se contamine
+          img.crossOrigin = 'anonymous';
 
           await new Promise((resolve, reject) => {
             img.onload = () => {
@@ -278,15 +273,11 @@ export async function renderDashboard() {
               resolve();
             };
             img.onerror = reject;
-            // Asignar el enlace local efímero creado en la memoria del dispositivo.
-            img.src = localUrl;
+            // Usar nuestra propia API proxy (Serverless) para agregar cabeceras CORS
+            img.src = `/api/flyer-image?url=${encodeURIComponent(profile.photo_url)}`;
           });
-
-          // Limpiar memoria
-          URL.revokeObjectURL(localUrl);
-
         } catch (e) {
-          console.error("Flyer image load error (Direct Blob):", e);
+          console.error("Flyer image load error (Proxy API):", e);
           drawFallbackAvatar();
         }
       } else {
