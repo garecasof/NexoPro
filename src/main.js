@@ -139,9 +139,9 @@ async function init() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-    // Check if dismissed recently (e.g., 7 days)
+    // Check if dismissed recently (1 day)
     const lastDismissed = localStorage.getItem('nexo_pwa_dismissed');
-    const dismissedRecently = lastDismissed && (Date.now() - parseInt(lastDismissed)) < (7 * 24 * 60 * 60 * 1000);
+    const dismissedRecently = lastDismissed && (Date.now() - parseInt(lastDismissed)) < (24 * 60 * 60 * 1000);
     const banner = document.getElementById('pwa-install-banner');
     const dismissBtn = document.getElementById('pwa-dismiss-btn');
     const acceptBtn = document.getElementById('pwa-accept-btn');
