@@ -124,6 +124,32 @@ addRoute('/favorites', () => {
     renderFavorites();
 });
 
+// ── PWA Global State & Listeners ────────────────
+window.deferredPrompt = null;
+window.installPromptActive = false;
+
+// Capturar el evento de instalación lo antes posible (fuera de init)
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('✨ beforeinstallprompt fired!');
+    e.preventDefault();
+    window.deferredPrompt = e;
+    window.installPromptActive = true;
+
+    // Intentar mostrar el botón verde del navbar inmediatamente si ya existe
+    const installBtn = document.getElementById('btn-install-nav');
+    if (installBtn) {
+        installBtn.style.display = 'flex';
+        installBtn.onclick = () => window.triggerInstall();
+    }
+
+    // Mostrar el banner inferior si ya existe
+    const banner = document.getElementById('pwa-install-banner');
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (!isStandalone && banner) {
+        banner.classList.add('show');
+    }
+});
+
 // ── Init ────────────────────────────────────────
 async function init() {
     // Block the app until Supabase connection is established
@@ -134,8 +160,6 @@ async function init() {
         console.error('Failed to initialize Supabase:', err);
     }
 
-    // ── PWA Install Logic ────────────────────────
-    window.deferredPrompt = null;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
@@ -177,25 +201,18 @@ async function init() {
         acceptBtn.addEventListener('click', window.triggerInstall);
     }
 
-    // Chrome/Android dispara esto cuando aprueba la "Instalabilidad"
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('✨ beforeinstallprompt fired!');
-        e.preventDefault();
-        window.deferredPrompt = e;
-        window.installPromptActive = true;
-
-        // Mostrar el botón verde del navbar
+    // Si el evento ya se disparó antes de que init() termine, 
+    // nos aseguramos de que los elementos reflejen el estado
+    if (window.installPromptActive) {
         const installBtn = document.getElementById('btn-install-nav');
         if (installBtn) {
             installBtn.style.display = 'flex';
             installBtn.onclick = window.triggerInstall;
         }
-
-        // Mostrar el banner inferior
-        if (!isStandalone && banner) {
+        if (!isStandalone && banner && !banner.classList.contains('show')) {
             banner.classList.add('show');
         }
-    });
+    }
 
     // FALLBACK UNIVERSAL: Si Chrome no dispara beforeinstallprompt en 2s,
     // igualmente mostramos el banner y botón verde para iOS + Android fallback

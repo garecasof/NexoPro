@@ -3,8 +3,7 @@ const CACHE_NAME = 'nexopro-v5'; // <-- Incrementado a v5 por el cambio a 3 colu
 const PRECACHE_URLS = [
     '/',
     '/index.html',
-    '/src/styles/index.css',
-    '/src/main.js'
+    '/manifest.json'
 ];
 
 // Install: cachear recursos esenciales y forzar instalación
