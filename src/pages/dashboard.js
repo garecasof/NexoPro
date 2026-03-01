@@ -273,8 +273,9 @@ export async function renderDashboard() {
               resolve();
             };
             img.onerror = reject;
-            // Clave 2: Cache-busting parameter para ignorar versiones cacheadas sin headers CORS
-            img.src = profile.photo_url + '?t=' + new Date().getTime();
+            // Usamos un proxy CORS público ultra-rápido para evitar bloqueos del servidor origen
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(profile.photo_url);
+            img.src = proxyUrl;
           });
         } catch (e) {
           console.error("Flyer image load error:", e);
