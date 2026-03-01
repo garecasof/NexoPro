@@ -6,10 +6,10 @@
 -- 1. Agregar columnas a la tabla de perfiles
 ALTER TABLE profiles 
 ADD COLUMN IF NOT EXISTS marketing_points INT DEFAULT 0,
-ADD COLUMN IF NOT EXISTS shares_count INT DEFAULT 0;
+ADD COLUMN IF NOT EXISTS shares_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS referred_by UUID REFERENCES profiles(id);
 
 -- 2. Crear una función para incrementar puntos de forma segura
--- Esto evita que el cliente tenga que leer y luego escribir (evita race conditions)
 CREATE OR REPLACE FUNCTION increment_marketing_points(profile_id UUID, points_to_add INT)
 RETURNS VOID AS $$
 BEGIN

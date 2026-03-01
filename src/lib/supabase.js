@@ -165,6 +165,28 @@ export async function fetchProfessionals(filters = {}) {
     return [];
 }
 
+export async function fetchVIPTalents() {
+    if (supabaseReady && supabase) {
+        // Obtenemos los últimos profesionales referidos que estén activos
+        const { data, error } = await supabase
+            .from('profiles')
+            .select(`*, categories(name, icon)`)
+            .not('referred_by', 'is', null)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (!error && data) {
+            return data.map(p => ({
+                ...p,
+                category_name: p.categories?.name || '',
+                category_icon: p.categories?.icon || '📋',
+            }));
+        }
+    }
+    return [];
+}
+
 export async function fetchProfessionalById(id) {
     if (supabaseReady && supabase) {
         const { data: profile } = await supabase

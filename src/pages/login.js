@@ -264,7 +264,13 @@ export async function renderLogin(params = {}) {
               phone: '+' + cleanWa,
               description: '',
               is_active: true,
+              referred_by: params.ref || null // Vincular al referente si existe
             });
+
+            // Si hubo referente, premiarlo con puntos extra
+            if (params.ref) {
+              await incrementMarketingPoints(params.ref, 10);
+            }
           }
 
           showToast('✅ ¡Bienvenido! Tu cuenta ha sido creada.', 'success');

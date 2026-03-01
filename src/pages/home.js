@@ -1,6 +1,6 @@
-// NexoPro — Home Page (UX Simplificada)
-import { fetchCategories, CATEGORY_GROUPS } from '../lib/supabase.js';
+import { fetchCategories, CATEGORY_GROUPS, fetchVIPTalents } from '../lib/supabase.js';
 import { renderCategoryCard } from '../components/category-card.js';
+import { renderProfessionalCard } from '../components/professional-card.js';
 import { showToast } from '../lib/toast.js';
 
 export async function renderHome() {
@@ -12,6 +12,7 @@ export async function renderHome() {
     </div>`;
 
   const categories = await fetchCategories();
+  const vipTalents = await fetchVIPTalents();
 
   // Colores suaves para cada grupo
   const groupColors = {
@@ -55,6 +56,19 @@ export async function renderHome() {
           </div>
         </div>`;
   }).join('')}
+
+    <!-- VIP / New Talents Section (Step 3: Ganamos Todos) -->
+    ${vipTalents.length > 0 ? `
+      <div style="margin:24px 16px 12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h2 style="font-size:1.15rem;font-weight:800;color:var(--dark);">✨ Novedades VIP</h2>
+          <span style="font-size:.75rem;background:var(--accent);color:white;padding:4px 8px;border-radius:12px;font-weight:700;text-transform:uppercase;">Nuevos Talentos</span>
+        </div>
+        <div class="pro-carousel" style="display:flex;overflow-x:auto;gap:12px;padding-bottom:8px;scrollbar-width:none;-ms-overflow-style:none;">
+          ${vipTalents.map(pro => renderProfessionalCard(pro)).join('')}
+        </div>
+      </div>
+    ` : ''}
 
     <!-- CTA for sharing -->
     <div style="padding:0 16px 20px;">
