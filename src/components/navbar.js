@@ -42,7 +42,14 @@ export async function initNavbarAccount() {
   // Note: main.js handles the event, but if navbar re-renders we might need to show it again
   if (window.installPromptActive) {
     const installBtn = document.getElementById('btn-install-nav');
-    if (installBtn) installBtn.style.display = 'flex';
+    if (installBtn) {
+      installBtn.style.display = 'flex';
+      installBtn.onclick = () => {
+        if (typeof window.triggerInstall === 'function') {
+          window.triggerInstall();
+        }
+      };
+    }
   }
 }
 

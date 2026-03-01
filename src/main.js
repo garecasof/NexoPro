@@ -135,72 +135,80 @@ async function init() {
     }
 
     // ── PWA Install Logic ────────────────────────
-    let deferredPrompt;
+    window.deferredPrompt = null;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
     const banner = document.getElementById('pwa-install-banner');
     const acceptBtn = document.getElementById('pwa-accept-btn');
 
-    // Función centralizada para disparar la instalación nativa
-    const triggerInstall = async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
+    // Función GLOBAL para disparar la instalación nativa
+    window.triggerInstall = async () => {
+        if (window.deferredPrompt) {
+            window.deferredPrompt.prompt();
+            const { outcome } = await window.deferredPrompt.userChoice;
             if (outcome === 'accepted') {
-                console.log('✅ PWA installed successfully!');
-                // Esconder todo
+                console.log('✅ PWA installed!');
                 if (banner) banner.classList.remove('show');
                 const navBtn = document.getElementById('btn-install-nav');
                 if (navBtn) navBtn.style.display = 'none';
                 window.installPromptActive = false;
             }
-            deferredPrompt = null;
+            window.deferredPrompt = null;
         } else if (isIOS) {
             import('./lib/toast.js').then(({ showToast }) => {
                 showToast('📱 En iPhone: tocá COMPARTIR abajo y luego "Agregar a inicio"', 'success');
+            });
+        } else {
+            import('./lib/toast.js').then(({ showToast }) => {
+                showToast('📱 Tocá los 3 puntitos ⋮ de tu navegador y elegí "Instalar app" o "Agregar a inicio"', 'success', 5000);
             });
         }
     };
 
     // Conectar botón del banner inferior
     if (acceptBtn) {
-        acceptBtn.addEventListener('click', triggerInstall);
+        acceptBtn.addEventListener('click', window.triggerInstall);
     }
 
     // Chrome/Android dispara esto cuando aprueba la "Instalabilidad"
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('✨ beforeinstallprompt event fired!');
+        console.log('✨ beforeinstallprompt fired!');
         e.preventDefault();
-        deferredPrompt = e;
+        window.deferredPrompt = e;
         window.installPromptActive = true;
 
-        // 1. Mostrar el botón verde del navbar (el que ya funcionaba)
+        // Mostrar el botón verde del navbar
         const installBtn = document.getElementById('btn-install-nav');
         if (installBtn) {
             installBtn.style.display = 'flex';
-            installBtn.onclick = triggerInstall;
+            installBtn.onclick = window.triggerInstall;
         }
 
-        // 2. Mostrar el banner inferior también
+        // Mostrar el banner inferior
         if (!isStandalone && banner) {
-            setTimeout(() => banner.classList.add('show'), 1500);
+            banner.classList.add('show');
         }
     });
 
-    // En iOS (Safari) no existe beforeinstallprompt
-    if (isIOS && !isStandalone) {
-        window.installPromptActive = true;
+    // FALLBACK UNIVERSAL: Si Chrome no dispara beforeinstallprompt en 2s,
+    // igualmente mostramos el banner y botón verde para iOS + Android fallback
+    if (!isStandalone) {
         setTimeout(() => {
+            console.log('🕒 Fallback PWA triggered');
+            window.installPromptActive = true;
+            // Botón verde del navbar
             const installBtn = document.getElementById('btn-install-nav');
             if (installBtn) {
                 installBtn.style.display = 'flex';
-                installBtn.onclick = triggerInstall;
+                installBtn.onclick = window.triggerInstall;
             }
-            if (banner) banner.classList.add('show');
-        }, 1000);
+            // Banner inferior
+            if (banner && !banner.classList.contains('show')) {
+                banner.classList.add('show');
+            }
+        }, 2000);
     }
-
 
     // Hide splash screen after a brief delay
     setTimeout(() => {
