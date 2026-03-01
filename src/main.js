@@ -143,11 +143,11 @@ async function init() {
     const acceptBtn = document.getElementById('pwa-accept-btn');
 
     const showInstallBanner = () => {
-        // Solo mostrar si no es una app instalada
-        if (!isStandalone && banner) {
+        // Solo mostrar si no es una app instalada y Chrome NOS DIO PERMISO (deferredPrompt)
+        if (!isStandalone && banner && (deferredPrompt || isIOS)) {
             setTimeout(() => {
                 banner.classList.add('show');
-            }, 3000); // 3 segundos de retraso para no asustar al entrar
+            }, 500); // Pequeño retraso para carga inicial
         }
     };
 
@@ -183,20 +183,14 @@ async function init() {
         console.log('✨ beforeinstallprompt event fired natively by Chrome!');
         e.preventDefault();
         deferredPrompt = e;
+        // Solo cuando tenemos la promesa de instalacion guardada, mostramos el boton
         showInstallBanner();
     });
 
-    // Fallback Agresivo (Testing): Si no se dispara `beforeinstallprompt`,
-    // Forzamos el banner visual pasados 1.5s para asegurarnos de que el HTML y CSS funcionan.
-    // Si el usuario da tap en Android sin prompt, le diremos que use el menú de Chrome.
-    setTimeout(() => {
-        if (!isStandalone) {
-            console.log('Fallback: Forzing Install Banner unconditionally for testing');
-            if (banner && !banner.classList.contains('show')) {
-                banner.classList.add('show');
-            }
-        }
-    }, 1500);
+    // En iOS (Safari) no existe beforeinstallprompt, así que disparamos el banner manualmente
+    if (isIOS && !isStandalone) {
+        showInstallBanner();
+    }
 
     // Hide splash screen after a brief delay
     setTimeout(() => {
