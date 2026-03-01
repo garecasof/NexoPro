@@ -105,6 +105,50 @@ export async function renderHome() {
         text: '¡Encontrá a los mejores profesionales o registrá tus servicios en NexoPro! Es 100% gratis.',
         url: window.location.origin
       };
+
+      try {
+        // Generar la imagen dinámicamente usando un canvas para asegurar máxima compatibilidad (PNG)
+        // ya que la API no siempre admite SVGs nativos en WhatsApp/Instagram.
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64">
+          <rect width="64" height="64" rx="14" fill="#007BFF"/>
+          <path d="M20 44V20L36 38V20" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M36 20H42.5C46.64 20 50 23.36 50 27.5C50 31.64 46.64 35 42.5 35H36" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="44" cy="43" r="5" fill="#00C853"/>
+        </svg>`;
+
+        const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+
+        await new Promise((resolve, reject) => {
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 512, 512);
+            URL.revokeObjectURL(svgUrl);
+
+            canvas.toBlob((blob) => {
+              if (blob) {
+                const file = new File([blob], 'nexopro-apoya-nuestra-app.png', { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                  shareData.files = [file];
+                }
+              }
+              resolve();
+            }, 'image/png');
+          };
+          img.onerror = reject;
+          img.src = svgUrl;
+        });
+
+      } catch (err) {
+        console.warn('No se pudo adjuntar la imagen al share:', err);
+      }
+
       if (navigator.share) {
         try {
           await navigator.share(shareData);
