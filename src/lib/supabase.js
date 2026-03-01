@@ -91,6 +91,21 @@ export async function hasSubcategories(categoryId) {
 // Categories that require a license/matrícula field
 export const LICENSE_REQUIRED_GROUPS = ['salud', 'legal'];
 
+/**
+ * Incrementa los puntos de marketing de un profesional de forma segura (RPC)
+ */
+export async function incrementMarketingPoints(profile_id, points = 1) {
+    if (supabaseReady && supabase) {
+        const { error } = await supabase.rpc('increment_marketing_points', {
+            profile_id: profile_id,
+            points_to_add: points
+        });
+        if (error) console.error('Error incrementing points:', error);
+        return { error };
+    }
+    return { error: 'Supabase not ready' };
+}
+
 export async function fetchProfessionals(filters = {}) {
     if (supabaseReady && supabase) {
         let query = supabase
@@ -130,7 +145,13 @@ export async function fetchProfessionals(filters = {}) {
             }
             query = query.or(orFilter);
         }
-        query = query.order('rating', { ascending: false });
+
+        // --- RANKING VUELO PRO ---
+        // 1. Prioridad por puntos de marketing (quienes más comparten)
+        // 2. Ranking de estrellas (calidad del servicio)
+        query = query
+            .order('marketing_points', { ascending: false })
+            .order('rating', { ascending: false });
 
         const { data, error } = await query;
         if (!error && data) {

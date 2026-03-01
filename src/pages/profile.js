@@ -1,5 +1,5 @@
 // NexoPro — Profile Page
-import { fetchProfessionalById, createPublicReview, updateReviewByToken, getInitials } from '../lib/supabase.js';
+import { fetchProfessionalById, createPublicReview, updateReviewByToken, getInitials, incrementMarketingPoints } from '../lib/supabase.js';
 import { showToast } from '../lib/toast.js';
 import { isFavorite } from '../lib/favorites.js';
 import { loadLeaflet } from '../main.js';
@@ -87,6 +87,10 @@ export async function renderProfile(params = {}) {
       <button class="profile-action-btn" id="profile-share-btn" style="background:var(--gray-200);color:var(--text);border:none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
         Compartir
+      </button>
+      <button class="profile-action-btn" id="profile-pass-data-btn" style="background:#E3F2FD;color:#1976D2;border:none;flex:1.5;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Pasar el dato (+1 punto)
       </button>
     </div>
 
@@ -389,6 +393,23 @@ export async function renderProfile(params = {}) {
           showToast('No se pudo copiar el link', 'error');
         }
       }
+    });
+  }
+
+  // Pass Data button (WhatsApp recommendation)
+  const passDataBtn = document.getElementById('profile-pass-data-btn');
+  if (passDataBtn) {
+    passDataBtn.addEventListener('click', async () => {
+      const catName = pro.category_name || 'Profesional';
+      const city = pro.address ? ` en ${pro.address.split(',').pop().trim()}` : '';
+      const shareUrl = `${window.location.origin}/#/profile?id=${pro.id}`;
+      const text = `¡Hola! Te paso el dato de este ${catName}${city} que encontré en NexoPro: ${pro.full_name}. Podés ver su perfil acá: ${shareUrl}`;
+
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+
+      // Dar punto al profesional por ser compartido
+      await incrementMarketingPoints(pro.id, 1);
     });
   }
 

@@ -1,5 +1,5 @@
 // NexoPro — Dashboard Page (Panel del Profesional)
-import { getCurrentUser, fetchProfessionalById, signOut, updateProfile, getInitials } from '../lib/supabase.js';
+import { getCurrentUser, fetchProfessionalById, signOut, updateProfile, getInitials, incrementMarketingPoints } from '../lib/supabase.js';
 import { showToast } from '../lib/toast.js';
 
 export async function renderDashboard() {
@@ -46,8 +46,8 @@ export async function renderDashboard() {
       <h1 class="dashboard-name">${profile.full_name}</h1>
       <div class="dashboard-stats">
         <div class="stat-card">
-          <div class="stat-value">0</div>
-          <div class="stat-label">Contactos</div>
+          <div class="stat-value">${profile.marketing_points || 0}</div>
+          <div class="stat-label">Puntos Nexo</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">${profile.rating > 0 ? profile.rating : '-'}</div>
@@ -98,6 +98,28 @@ export async function renderDashboard() {
         <div class="dashboard-menu-text">
           <div class="dashboard-menu-title">Mi ubicación</div>
           <div class="dashboard-menu-desc">Actualizar tu dirección y punto en el mapa.</div>
+        </div>
+        <span class="dashboard-menu-arrow">→</span>
+      </div>
+
+      <div class="section-header mt-16">
+        <h2 class="section-title">🚀 Mi Marketing (Vuelo Pro)</h2>
+      </div>
+
+      <div class="dashboard-menu-item" style="background:linear-gradient(135deg,rgba(255,107,107,0.1),rgba(255,142,83,0.1));" id="menu-promote-profile">
+        <div class="dashboard-menu-icon" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:white;">🚀</div>
+        <div class="dashboard-menu-text">
+          <div class="dashboard-menu-title">Promocionarme (+Puntos)</div>
+          <div class="dashboard-menu-desc">Compartí tu perfil en WhatsApp o redes para subir de ranking.</div>
+        </div>
+        <span class="dashboard-menu-arrow">→</span>
+      </div>
+
+      <div class="dashboard-menu-item" id="menu-referral">
+        <div class="dashboard-menu-icon" style="background:var(--accent);color:white;">🤝</div>
+        <div class="dashboard-menu-text">
+          <div class="dashboard-menu-title">Invitar a un colega (VIP)</div>
+          <div class="dashboard-menu-desc">Ganá visibilidad destacada invitando a otros profesionales.</div>
         </div>
         <span class="dashboard-menu-arrow">→</span>
       </div>
@@ -160,6 +182,43 @@ export async function renderDashboard() {
         showToast('❌ Error inesperado: ' + err.message, 'error');
         e.target.checked = !isActive;
       }
+    });
+  }
+
+  // Promote Profile flow
+  const promoteBtn = document.getElementById('menu-promote-profile');
+  if (promoteBtn) {
+    promoteBtn.addEventListener('click', async () => {
+      const shareUrl = `${window.location.origin}/#/profile?id=${profile.id}`;
+      const shareData = {
+        title: `Perfil Profesional de ${profile.full_name}`,
+        text: `¡Hola! Te recomiendo mis servicios en NexoPro. Podés ver mi perfil completo aquí:`,
+        url: shareUrl
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          await incrementMarketingPoints(profile.id, 5); // +5 puntos por promo activa
+          showToast('🚀 ¡Puntos ganados! Tu ranking ha subido.', 'success');
+          renderDashboard(); // Refresh stats
+        } catch (e) { }
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('📋 Link copiado. ¡Compartilo para ganar puntos!', 'success');
+        await incrementMarketingPoints(profile.id, 2); // +2 puntos por copia de link
+        renderDashboard();
+      }
+    });
+  }
+
+  // Referral flow (Placeholder for Step 3)
+  const referBtn = document.getElementById('menu-referral');
+  if (referBtn) {
+    referBtn.addEventListener('click', () => {
+      const refUrl = `${window.location.origin}/#/register?ref=${profile.id}`;
+      navigator.clipboard.writeText(refUrl);
+      showToast('🤝 Link de invitación copiado. Compartilo con colegas.', 'success');
     });
   }
 }
