@@ -253,19 +253,15 @@ export async function renderDashboard() {
       // User avatar (Placeholder or real)
       if (profile.photo_url) {
         try {
-          // El método definitivo libre de CORS: Fetch -> Blob -> Base64
-          const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(profile.photo_url);
-          const response = await fetch(proxyUrl);
+          // El método que funcionó en home.js: Fetch -> Blob -> ObjectURL directo.
+          // Sin proxys raros, descargamos la imagen binaria de Supabase y creamos una URL local efímera.
+          const response = await fetch(profile.photo_url);
+          if (!response.ok) throw new Error("Fallo al descargar imagen");
           const blob = await response.blob();
-
-          const base64data = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
+          const localUrl = URL.createObjectURL(blob);
 
           const img = new Image();
+
           await new Promise((resolve, reject) => {
             img.onload = () => {
               ctx.save();
@@ -282,11 +278,15 @@ export async function renderDashboard() {
               resolve();
             };
             img.onerror = reject;
-            // Base64 Data URI (CORS free domain)
-            img.src = base64data;
+            // Asignar el enlace local efímero creado en la memoria del dispositivo.
+            img.src = localUrl;
           });
+
+          // Limpiar memoria
+          URL.revokeObjectURL(localUrl);
+
         } catch (e) {
-          console.error("Flyer image load error (Base64):", e);
+          console.error("Flyer image load error (Direct Blob):", e);
           drawFallbackAvatar();
         }
       } else {
