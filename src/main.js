@@ -143,8 +143,8 @@ async function init() {
     const acceptBtn = document.getElementById('pwa-accept-btn');
 
     const showInstallBanner = () => {
-        // Solo mostrar si no es una app instalada y Chrome NOS DIO PERMISO (deferredPrompt)
-        if (!isStandalone && banner && (deferredPrompt || isIOS)) {
+        // Solo mostrar si no es una app instalada
+        if (!isStandalone && banner) {
             setTimeout(() => {
                 banner.classList.add('show');
             }, 500); // Pequeño retraso para carga inicial
@@ -165,12 +165,12 @@ async function init() {
                 // Fallback Manual para iPhones
                 import('./lib/toast.js').then(({ showToast }) => {
                     showToast('📱 En iPhone: tocá COMPARTIR abajo y luego "Agregar a inicio"', 'success');
-                    banner.classList.remove('show'); // Escondemos el banner para dejar ver las opciones de safari
+                    banner.classList.remove('show'); // Escondemos el banner
                 });
             } else {
-                // Fallback PC/Desktop o navegadores raros
+                // Fallback Alternativo Android: El navegador no disparó el prompt nativo
                 import('./lib/toast.js').then(({ showToast }) => {
-                    showToast('💡 Buscá el icono de "App" en la barra de direcciones del navegador', 'success');
+                    showToast('💡 Buscá "Instalar App" o "Agregar a inicio" en el menú de los 3 puntitos de tu navegador', 'success', 5000);
                     banner.classList.remove('show');
                 });
             }
@@ -191,6 +191,16 @@ async function init() {
     if (isIOS && !isStandalone) {
         showInstallBanner();
     }
+
+    // Fallback Universal: Si Chrome decide ocultar el evento nativo,
+    // mostramos de todas formas el banner visual después de 2.5 segundos. 
+    // Si tocan el botón, se usará el Toast guiado en su lugar.
+    setTimeout(() => {
+        if (!isStandalone && banner && !banner.classList.contains('show')) {
+            console.log('Forcing Install Banner visual via Universal Fallback');
+            showInstallBanner();
+        }
+    }, 2500);
 
     // Hide splash screen after a brief delay
     setTimeout(() => {
