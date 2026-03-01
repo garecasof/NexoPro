@@ -115,6 +115,15 @@ export async function renderDashboard() {
         <span class="dashboard-menu-arrow">→</span>
       </div>
 
+      <div class="dashboard-menu-item" style="background:linear-gradient(135deg,rgba(147,51,234,0.1),rgba(192,132,252,0.1));" id="menu-generate-flyer">
+        <div class="dashboard-menu-icon" style="background:linear-gradient(135deg,#9333EA,#C084FC);color:white;">🎨</div>
+        <div class="dashboard-menu-text">
+          <div class="dashboard-menu-title">Crear Flyer (Instagram)</div>
+          <div class="dashboard-menu-desc">Imágen lista para subir a tus Historias o Reels.</div>
+        </div>
+        <span class="dashboard-menu-arrow">→</span>
+      </div>
+
       <div class="dashboard-menu-item" id="menu-referral">
         <div class="dashboard-menu-icon" style="background:var(--accent);color:white;">🤝</div>
         <div class="dashboard-menu-text">
@@ -209,6 +218,124 @@ export async function renderDashboard() {
         await incrementMarketingPoints(profile.id, 2); // +2 puntos por copia de link
         renderDashboard();
       }
+    });
+  }
+
+  // Flyer Generator (Step 2: Kit de Marketing)
+  const flyerBtn = document.getElementById('menu-generate-flyer');
+  if (flyerBtn) {
+    flyerBtn.addEventListener('click', async () => {
+      showToast('🎨 Generando tu flyer premium...', 'success');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Background (Gradient modern)
+      const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
+      gradient.addColorStop(0, '#0056CC');
+      gradient.addColorStop(1, '#00C853');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Glassmorphism card
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.roundRect(90, 300, 900, 1320, 40);
+      ctx.fill();
+
+      // NexoPro Logo Top
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 80px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('NexoPro', 540, 180);
+
+      // User avatar (Placeholder or real)
+      if (profile.photo_url) {
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          await new Promise((resolve) => {
+            img.onload = () => {
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(540, 500, 150, 0, Math.PI * 2, true);
+              ctx.closePath();
+              ctx.clip();
+              ctx.drawImage(img, 390, 350, 300, 300);
+              ctx.restore();
+              resolve();
+            };
+            img.onerror = resolve;
+            img.src = profile.photo_url;
+          });
+        } catch (e) { }
+      } else {
+        ctx.fillStyle = avatarBg;
+        ctx.beginPath();
+        ctx.arc(540, 500, 150, 0, Math.PI * 2, true);
+        ctx.fill();
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 120px "Inter", sans-serif';
+        ctx.fillText(initials, 540, 545);
+      }
+
+      // Name & Category
+      ctx.fillStyle = '#2C2C2C';
+      ctx.font = 'bold 90px "Inter", sans-serif';
+      ctx.fillText(profile.full_name, 540, 800);
+
+      ctx.fillStyle = '#007BFF';
+      ctx.font = '60px "Inter", sans-serif';
+      ctx.fillText(profile.category_name || 'Servicios Profesionales', 540, 900);
+
+      const city = profile.address ? profile.address.split(',').pop().trim() : '';
+      if (city) {
+        ctx.fillStyle = '#6C757D';
+        ctx.font = '50px "Inter", sans-serif';
+        ctx.fillText(`📍 ${city}`, 540, 1000);
+      }
+
+      // Decorative Stars
+      ctx.fillStyle = '#FF9500';
+      ctx.font = '80px Arial';
+      let stars = '⭐⭐⭐⭐⭐';
+      if (profile.rating > 0) stars = '⭐'.repeat(Math.round(profile.rating));
+      ctx.fillText(stars, 540, 1150);
+
+      // CTA Bottom
+      ctx.fillStyle = '#00C853';
+      ctx.roundRect(190, 1350, 700, 120, 60);
+      ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 45px "Inter", sans-serif';
+      ctx.fillText('¡Contactame por WhatsApp!', 540, 1430);
+
+      // Export
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], `flyer-${profile.full_name.replace(/\s/g, '')}.png`, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Mi Flyer',
+              text: '¡Buscame en NexoPro!'
+            });
+            await incrementMarketingPoints(profile.id, 5);
+          } catch (e) { }
+        } else {
+          // Fallback download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = file.name;
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast('📸 Flyer descargado. ¡Subilo a tus redes!', 'success');
+        }
+      }, 'image/png');
+
     });
   }
 
