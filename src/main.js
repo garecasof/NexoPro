@@ -189,18 +189,25 @@ async function init() {
     }
 
     // Chrome/Android dispara esto mágicamente cuando aprueba la "Instalabilidad"
+    // Criterios: HTTPS, Web Manifest valido, Service Worker registrado, interaccion previa en el dominio.
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('✨ beforeinstallprompt event fired');
+        console.log('✨ beforeinstallprompt event fired natively by Chrome!');
         e.preventDefault();
         deferredPrompt = e;
         showInstallBanner();
     });
 
-    // En iOS (Safari) no existe beforeinstallprompt, así que disparamos el banner manualmente
-    // porque Apple es "especial" y usa su propio ecosistema.
-    if (isIOS && !isStandalone) {
-        showInstallBanner();
-    }
+    // Fallback Agresivo (Testing): Si no se dispara `beforeinstallprompt`,
+    // Forzamos el banner visual pasados 1.5s para asegurarnos de que el HTML y CSS funcionan.
+    // Si el usuario da tap en Android sin prompt, le diremos que use el menú de Chrome.
+    setTimeout(() => {
+        if (!isStandalone) {
+            console.log('Fallback: Forzing Install Banner unconditionally for testing');
+            if (banner && !banner.classList.contains('show') && !dismissedRecently) {
+                banner.classList.add('show');
+            }
+        }
+    }, 1500);
 
     // Hide splash screen after a brief delay
     setTimeout(() => {
