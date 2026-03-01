@@ -1,5 +1,14 @@
 // NexoPro — Dashboard Page (Panel del Profesional)
-import { getCurrentUser, fetchProfessionalById, signOut, updateProfile, getInitials, incrementMarketingPoints } from '../lib/supabase.js';
+import {
+  getCurrentUser,
+  fetchProfessionalById,
+  signOut,
+  updateProfile,
+  getInitials,
+  incrementMarketingPoints,
+  getPushSubscription,
+  savePushSubscription
+} from '../lib/supabase.js';
 import { showToast } from '../lib/toast.js';
 
 export async function renderDashboard() {
@@ -142,6 +151,20 @@ export async function renderDashboard() {
         <span class="dashboard-menu-arrow">→</span>
       </div>
 
+      <!-- Push Notifications Toggle -->
+      <div class="toggle-container" style="margin-bottom:12px;background:#E3F2FD;border:1px solid #BBDEFB;">
+        <div>
+          <div style="font-size:.9rem;font-weight:600;color:#1565C0;" id="push-toggle-label">Alertas Push</div>
+          <div style="font-size:.75rem;color:#1976D2;" id="push-toggle-desc">Recibí avisos de clientes nuevos.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-push-notifications">
+          <span class="toggle-track" style="background:#64B5F6;">
+            <span class="toggle-knob"></span>
+          </span>
+        </label>
+      </div>
+
       <div class="toggle-container">
         <div>
           <div style="font-size:.9rem;font-weight:600;" id="toggle-label">Perfil ${profile.is_active !== false ? 'visible' : 'oculto'}</div>
@@ -219,6 +242,78 @@ export async function renderDashboard() {
         renderDashboard();
       }
     });
+  }
+
+  // ==========================================
+  // PUSH NOTIFICATIONS LOGIC
+  // ==========================================
+  const pushToggle = document.getElementById('toggle-push-notifications');
+  const VAPID_PUBLIC_KEY = 'BLtMI_xfq-QGETQZQ0UbbiDToqr8z5OD61UZG3GhcDdAfYWUEhIMHlzt1KYLvIfP2beKbQYI2WECk8-GlF5ls6Y';
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  if (pushToggle && 'serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.ready.then(async (registration) => {
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        pushToggle.checked = true;
+        document.getElementById('push-toggle-label').textContent = 'Alertas Activadas';
+      }
+    });
+
+    pushToggle.addEventListener('change', async (e) => {
+      const wantPush = e.target.checked;
+
+      if (!wantPush) {
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const sub = await reg.pushManager.getSubscription();
+          if (sub) await sub.unsubscribe();
+          showToast('Alertas desactivadas en este dispositivo', 'success');
+          document.getElementById('push-toggle-label').textContent = 'Alertas Push';
+        } catch (err) {
+          console.error(err);
+          e.target.checked = true;
+        }
+        return;
+      }
+
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') throw new Error('Permiso denegado por el usuario');
+
+        showToast('⏳ Configurando alertas...', 'success');
+        const registration = await navigator.serviceWorker.ready;
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+
+        const result = await savePushSubscription(profile.id, subscription);
+        if (result.error) throw result.error;
+
+        showToast('🔔 ¡Alertas activadas exitosamente!', 'success');
+        document.getElementById('push-toggle-label').textContent = 'Alertas Activadas';
+
+      } catch (err) {
+        console.error('Error suscribiendo a push:', err);
+        showToast('❌ No se pudieron activar las alertas (Permisos bloqueados)', 'error');
+        e.target.checked = false;
+      }
+    });
+  } else if (pushToggle) {
+    pushToggle.disabled = true;
+    document.getElementById('push-toggle-desc').textContent = 'Tu navegador no permite alertas push.';
   }
 
   // Flyer Generator (Step 2: Kit de Marketing)

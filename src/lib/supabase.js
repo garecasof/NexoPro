@@ -265,6 +265,41 @@ export async function updateProfile(id, updates) {
     return { error };
 }
 
+// ==========================================
+// PUSH NOTIFICATIONS (Phase 3)
+// ==========================================
+export async function getPushSubscription(profileId, endpointUrl) {
+    if (!supabase) return null;
+    const { data } = await supabase
+        .from('push_subscriptions')
+        .select('*')
+        .eq('profile_id', profileId)
+        .eq('endpoint', endpointUrl)
+        .single();
+    return data;
+}
+
+export async function savePushSubscription(profileId, subscription) {
+    if (!supabase) return { error: { message: 'Supabase no conectado' } };
+
+    // Extraer claves generadas por el navegador
+    const endpoint = subscription.endpoint;
+    const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh'))));
+    const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))));
+
+    const { error } = await supabase
+        .from('push_subscriptions')
+        .upsert({
+            profile_id: profileId,
+            endpoint: endpoint,
+            p256dh: p256dh,
+            auth: auth,
+            last_used: new Date()
+        }, { onConflict: 'endpoint' });
+
+    return { error };
+}
+
 // ── Services API ──
 
 export async function fetchMyServices(profileId) {
