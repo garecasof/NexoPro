@@ -253,10 +253,19 @@ export async function renderDashboard() {
       // User avatar (Placeholder or real)
       if (profile.photo_url) {
         try {
-          const img = new Image();
-          // Clave para evadir CORS: crossOrigin ANTES del src
-          img.crossOrigin = 'anonymous';
+          // El método definitivo libre de CORS: Fetch -> Blob -> Base64
+          const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(profile.photo_url);
+          const response = await fetch(proxyUrl);
+          const blob = await response.blob();
 
+          const base64data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+
+          const img = new Image();
           await new Promise((resolve, reject) => {
             img.onload = () => {
               ctx.save();
@@ -273,12 +282,11 @@ export async function renderDashboard() {
               resolve();
             };
             img.onerror = reject;
-            // Usamos un proxy CORS público ultra-rápido para evitar bloqueos del servidor origen
-            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(profile.photo_url);
-            img.src = proxyUrl;
+            // Base64 Data URI (CORS free domain)
+            img.src = base64data;
           });
         } catch (e) {
-          console.error("Flyer image load error:", e);
+          console.error("Flyer image load error (Base64):", e);
           drawFallbackAvatar();
         }
       } else {
