@@ -139,28 +139,17 @@ async function init() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-    // Check if dismissed recently (1 day)
-    const lastDismissed = localStorage.getItem('nexo_pwa_dismissed');
-    const dismissedRecently = lastDismissed && (Date.now() - parseInt(lastDismissed)) < (24 * 60 * 60 * 1000);
     const banner = document.getElementById('pwa-install-banner');
-    const dismissBtn = document.getElementById('pwa-dismiss-btn');
     const acceptBtn = document.getElementById('pwa-accept-btn');
 
     const showInstallBanner = () => {
-        // Solo mostrar si no es una app instalada y el usuario no la rechazó recientemente
-        if (!isStandalone && !dismissedRecently && banner) {
+        // Solo mostrar si no es una app instalada
+        if (!isStandalone && banner) {
             setTimeout(() => {
                 banner.classList.add('show');
             }, 3000); // 3 segundos de retraso para no asustar al entrar
         }
     };
-
-    if (dismissBtn) {
-        dismissBtn.addEventListener('click', () => {
-            banner.classList.remove('show');
-            localStorage.setItem('nexo_pwa_dismissed', Date.now().toString());
-        });
-    }
 
     if (acceptBtn) {
         acceptBtn.addEventListener('click', async () => {
@@ -203,7 +192,7 @@ async function init() {
     setTimeout(() => {
         if (!isStandalone) {
             console.log('Fallback: Forzing Install Banner unconditionally for testing');
-            if (banner && !banner.classList.contains('show') && !dismissedRecently) {
+            if (banner && !banner.classList.contains('show')) {
                 banner.classList.add('show');
             }
         }
