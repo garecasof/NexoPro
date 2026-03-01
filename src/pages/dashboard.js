@@ -253,24 +253,40 @@ export async function renderDashboard() {
       // User avatar (Placeholder or real)
       if (profile.photo_url) {
         try {
+          // Solución de CORS para Canvas: Fetch como blob primero
+          const response = await fetch(profile.photo_url);
+          const blob = await response.blob();
+          const localUrl = URL.createObjectURL(blob);
+
           const img = new Image();
-          img.crossOrigin = 'anonymous';
-          await new Promise((resolve) => {
+          await new Promise((resolve, reject) => {
             img.onload = () => {
               ctx.save();
               ctx.beginPath();
               ctx.arc(540, 500, 150, 0, Math.PI * 2, true);
               ctx.closePath();
               ctx.clip();
-              ctx.drawImage(img, 390, 350, 300, 300);
+              // Cubrir proporcionalmente (cover flow logic simple)
+              const size = Math.min(img.width, img.height);
+              const x = (img.width - size) / 2;
+              const y = (img.height - size) / 2;
+              ctx.drawImage(img, x, y, size, size, 390, 350, 300, 300);
               ctx.restore();
               resolve();
             };
-            img.onerror = resolve;
-            img.src = profile.photo_url;
+            img.onerror = reject;
+            img.src = localUrl;
           });
-        } catch (e) { }
+          URL.revokeObjectURL(localUrl);
+        } catch (e) {
+          console.error("Flyer image load error:", e);
+          drawFallbackAvatar();
+        }
       } else {
+        drawFallbackAvatar();
+      }
+
+      function drawFallbackAvatar() {
         ctx.fillStyle = avatarBg;
         ctx.beginPath();
         ctx.arc(540, 500, 150, 0, Math.PI * 2, true);
