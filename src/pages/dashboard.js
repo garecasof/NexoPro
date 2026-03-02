@@ -46,6 +46,16 @@ export async function renderDashboard() {
 
   // Define dynamic content
   content.innerHTML = `
+    <!-- Push Notifications Banner (Forced) -->
+    <div id="push-promo-banner" class="push-promo-banner">
+      <div class="push-promo-icon">🔔</div>
+      <div class="push-promo-text">
+        <h3 class="push-promo-title">¡No te pierdas de nada!</h3>
+        <p class="push-promo-desc">Activá las notificaciones para recibir alertas cuando clientes soliciten tus servicios.</p>
+        <button id="btn-activate-push" class="push-promo-btn">Activar Alertas</button>
+      </div>
+    </div>
+
     <!-- Dashboard Header -->
     <div class="dashboard-header" style="text-align:center;">
       <div class="dashboard-avatar" style="background:${profile.photo_url ? `url('${profile.photo_url}')` : avatarBg}; background-size: cover; background-position: center;">
@@ -151,19 +161,6 @@ export async function renderDashboard() {
         <span class="dashboard-menu-arrow">→</span>
       </div>
 
-      <!-- Push Notifications Toggle -->
-      <div class="toggle-container" style="margin-bottom:12px;background:#E3F2FD;border:1px solid #BBDEFB;">
-        <div>
-          <div style="font-size:.9rem;font-weight:600;color:#1565C0;" id="push-toggle-label">Alertas Push</div>
-          <div style="font-size:.75rem;color:#1976D2;" id="push-toggle-desc">Recibí avisos de clientes nuevos.</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-push-notifications">
-          <span class="toggle-track" style="background:#64B5F6;">
-            <span class="toggle-knob"></span>
-          </span>
-        </label>
-      </div>
 
       <div class="toggle-container">
         <div>
@@ -247,7 +244,8 @@ export async function renderDashboard() {
   // ==========================================
   // PUSH NOTIFICATIONS LOGIC
   // ==========================================
-  const pushToggle = document.getElementById('toggle-push-notifications');
+  const pushBanner = document.getElementById('push-promo-banner');
+  const btnActivatePush = document.getElementById('btn-activate-push');
   const VAPID_PUBLIC_KEY = 'BLtMI_xfq-QGETQZQ0UbbiDToqr8z5OD61UZG3GhcDdAfYWUEhIMHlzt1KYLvIfP2beKbQYI2WECk8-GlF5ls6Y';
 
   function urlBase64ToUint8Array(base64String) {
@@ -261,33 +259,20 @@ export async function renderDashboard() {
     return outputArray;
   }
 
-  if (pushToggle && 'serviceWorker' in navigator && 'PushManager' in window) {
+  if (pushBanner && btnActivatePush && 'serviceWorker' in navigator && 'PushManager' in window) {
     navigator.serviceWorker.ready.then(async (registration) => {
       const subscription = await registration.pushManager.getSubscription();
-      if (subscription) {
-        pushToggle.checked = true;
-        document.getElementById('push-toggle-label').textContent = 'Alertas Activadas';
+      if (!subscription) {
+        // Mostrar banner si no está suscrito
+        setTimeout(() => pushBanner.classList.add('slide-down'), 600);
       }
     });
 
-    pushToggle.addEventListener('change', async (e) => {
-      const wantPush = e.target.checked;
-
-      if (!wantPush) {
-        try {
-          const reg = await navigator.serviceWorker.ready;
-          const sub = await reg.pushManager.getSubscription();
-          if (sub) await sub.unsubscribe();
-          showToast('Alertas desactivadas en este dispositivo', 'success');
-          document.getElementById('push-toggle-label').textContent = 'Alertas Push';
-        } catch (err) {
-          console.error(err);
-          e.target.checked = true;
-        }
-        return;
-      }
-
+    btnActivatePush.addEventListener('click', async () => {
       try {
+        btnActivatePush.textContent = 'Activando...';
+        btnActivatePush.disabled = true;
+
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') throw new Error('Permiso denegado por el usuario');
 
@@ -303,17 +288,19 @@ export async function renderDashboard() {
         if (result.error) throw result.error;
 
         showToast('🔔 ¡Alertas activadas exitosamente!', 'success');
-        document.getElementById('push-toggle-label').textContent = 'Alertas Activadas';
+        pushBanner.classList.remove('slide-down');
+        setTimeout(() => pushBanner.remove(), 500);
 
       } catch (err) {
         console.error('Error suscribiendo a push:', err);
-        showToast('❌ No se pudieron activar las alertas (Permisos bloqueados)', 'error');
-        e.target.checked = false;
+        showToast('❌ Permiso denegado o error. Habilitalo en el navegador.', 'error');
+        btnActivatePush.textContent = 'Activar Alertas';
+        btnActivatePush.disabled = false;
       }
     });
-  } else if (pushToggle) {
-    pushToggle.disabled = true;
-    document.getElementById('push-toggle-desc').textContent = 'Tu navegador no permite alertas push.';
+  } else if (pushBanner) {
+    // Si el navegador no soporta push, simplemente no mostramos el banner
+    pushBanner.remove();
   }
 
   // Flyer Generator (Step 2: Kit de Marketing)

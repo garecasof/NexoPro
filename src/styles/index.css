@@ -1586,3 +1586,72 @@ ul {
   background: var(--gray-100);
   color: var(--dark-soft);
 }
+
+/* ---------- Push Promo Banner (Dashboard) ---------- */
+.push-promo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background: var(--white);
+  padding: 16px;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-150%);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 3px solid var(--accent);
+}
+
+.push-promo-banner.slide-down {
+  transform: translateY(calc(var(--navbar-h) + var(--safe-top)));
+}
+
+.push-promo-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  text-align: center;
+  width: 50px;
+}
+
+.push-promo-text {
+  flex: 1;
+}
+
+.push-promo-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 2px;
+}
+
+.push-promo-desc {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.push-promo-btn {
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  width: 100%;
+  padding: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.push-promo-btn:hover {
+  background: var(--accent-dark);
+}
+
+.push-promo-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
