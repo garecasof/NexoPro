@@ -47,12 +47,40 @@ export async function renderDashboard() {
   // Define dynamic content
   content.innerHTML = `
     <!-- Push Notifications Banner (Forced) -->
-    <div id="push-promo-banner" class="push-promo-banner">
+    <div id="push-promo-banner" class="push-promo-banner" style="display:none;">
       <div class="push-promo-icon">🔔</div>
       <div class="push-promo-text">
         <h3 class="push-promo-title">¡No te pierdas de nada!</h3>
         <p class="push-promo-desc">Activá las notificaciones para recibir alertas cuando clientes soliciten tus servicios.</p>
         <button id="btn-activate-push" class="push-promo-btn">Activar Alertas</button>
+      </div>
+    </div>
+
+    <!-- Push Notifications Banner (Blocked/Denied) -->
+    <div id="push-blocked-banner" class="push-promo-banner" style="display:none; background: #FFF9C4; border-bottom: 3px solid #FBC02D;">
+      <div class="push-promo-icon" style="filter: grayscale(1);">🔕</div>
+      <div class="push-promo-text">
+        <h3 class="push-promo-title" style="color: #F57F17;">Alertas Bloqueadas</h3>
+        <p class="push-promo-desc" style="color: #795548;">Detectamos que bloqueaste las alertas de nuevos clientes. ¿Querés saber cómo activarlas?</p>
+        <button id="btn-show-unblock-guide" class="push-promo-btn" style="background: #FBC02D; color: #3E2723;">Ver cómo desbloquear</button>
+      </div>
+    </div>
+
+    <!-- Modal: Guía para Desbloquear Push -->
+    <div id="push-guide-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; padding: 20px;">
+      <div class="modal-content" style="background:#FFF; border-radius:16px; width:100%; max-width:400px; padding:24px; box-shadow:0 20px 40px rgba(0,0,0,0.2); animation:slideUp 0.3s ease;">
+        <h3 style="font-size:1.2rem; font-weight:800; color:#333; margin-bottom:16px; text-align:center;">Cómo reactivar las alertas</h3>
+        
+        <div style="background:#F5F5F5; border-radius:8px; padding:16px; margin-bottom:16px;">
+           <ol style="margin-left: 20px; color:#444; font-size:0.95rem; line-height:1.6;">
+             <li style="margin-bottom:8px;">Tocá el ícono del <b>candado 🔒</b> (o el ícono de Opciones) arriba a la izquierda, en la barra de direcciones del navegador.</li>
+             <li style="margin-bottom:8px;">Buscá la opción <b>Permisos</b> o <b>Notificaciones</b>.</li>
+             <li style="margin-bottom:8px;">Cambialo de "Bloqueado" a <b>"Permitir"</b>.</li>
+             <li>Volvé a cargar la página.</li>
+           </ol>
+        </div>
+        
+        <button id="btn-close-push-guide" style="width:100%; padding:12px; background:var(--primary); color:#FFF; font-weight:bold; border-radius:8px; border:none;">Entendido, voy a hacerlo</button>
       </div>
     </div>
 
@@ -251,7 +279,13 @@ export async function renderDashboard() {
   // PUSH NOTIFICATIONS LOGIC
   // ==========================================
   const pushBanner = document.getElementById('push-promo-banner');
+  const blockedBanner = document.getElementById('push-blocked-banner');
   const btnActivatePush = document.getElementById('btn-activate-push');
+
+  const guideModal = document.getElementById('push-guide-modal');
+  const btnShowGuide = document.getElementById('btn-show-unblock-guide');
+  const btnCloseGuide = document.getElementById('btn-close-push-guide');
+
   const VAPID_PUBLIC_KEY = 'BLtMI_xfq-QGETQZQ0UbbiDToqr8z5OD61UZG3GhcDdAfYWUEhIMHlzt1KYLvIfP2beKbQYI2WECk8-GlF5ls6Y';
 
   function urlBase64ToUint8Array(base64String) {
@@ -265,48 +299,102 @@ export async function renderDashboard() {
     return outputArray;
   }
 
-  if (pushBanner && btnActivatePush && 'serviceWorker' in navigator && 'PushManager' in window) {
+  // Modal handlers
+  if (btnShowGuide) {
+    btnShowGuide.addEventListener('click', () => {
+      guideModal.style.display = 'flex';
+    });
+  }
+  if (btnCloseGuide) {
+    btnCloseGuide.addEventListener('click', () => {
+      guideModal.style.display = 'none';
+      blockedBanner.classList.remove('slide-down');
+      setTimeout(() => blockedBanner.style.display = 'none', 500); // Hide banner to be less invasive
+    });
+  }
+
+  if ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window) {
     navigator.serviceWorker.ready.then(async (registration) => {
       const subscription = await registration.pushManager.getSubscription();
+
       if (!subscription) {
-        // Mostrar banner si no está suscrito
-        setTimeout(() => pushBanner.classList.add('slide-down'), 600);
+        // Evaluate the permission state immediately
+        const currentPermission = Notification.permission;
+
+        if (currentPermission === 'denied') {
+          // Si el usuario ya rechazó en el pasado
+          blockedBanner.style.display = 'flex';
+          setTimeout(() => blockedBanner.classList.add('slide-down'), 600);
+        } else if (currentPermission === 'default') {
+          // Si nunca le preguntamos, mostramos el banner forzoso normal
+          pushBanner.style.display = 'flex';
+          setTimeout(() => pushBanner.classList.add('slide-down'), 600);
+        }
       }
     });
 
-    btnActivatePush.addEventListener('click', async () => {
-      try {
-        btnActivatePush.textContent = 'Activando...';
-        btnActivatePush.disabled = true;
+    if (btnActivatePush) {
+      btnActivatePush.addEventListener('click', async () => {
+        try {
+          if (Notification.permission === 'denied') {
+            // Edge case: permission turned to denied just now
+            pushBanner.classList.remove('slide-down');
+            setTimeout(() => {
+              pushBanner.style.display = 'none';
+              blockedBanner.style.display = 'flex';
+              setTimeout(() => blockedBanner.classList.add('slide-down'), 100);
+            }, 500);
+            return;
+          }
 
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') throw new Error('Permiso denegado por el usuario');
+          btnActivatePush.textContent = 'Activando...';
+          btnActivatePush.disabled = true;
 
-        showToast('⏳ Configurando alertas...', 'success');
-        const registration = await navigator.serviceWorker.ready;
+          const permission = await Notification.requestPermission();
+          if (permission === 'denied') throw new Error('Permiso denegado por el usuario');
 
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
+          showToast('⏳ Configurando alertas...', 'success');
+          const registration = await navigator.serviceWorker.ready;
 
-        const result = await savePushSubscription(profile.id, subscription);
-        if (result.error) throw result.error;
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+          });
 
-        showToast('🔔 ¡Alertas activadas exitosamente!', 'success');
-        pushBanner.classList.remove('slide-down');
-        setTimeout(() => pushBanner.remove(), 500);
+          const result = await savePushSubscription(profile.id, subscription);
+          if (result.error) throw result.error;
 
-      } catch (err) {
-        console.error('Error suscribiendo a push:', err);
-        showToast('❌ Permiso denegado o error. Habilitalo en el navegador.', 'error');
-        btnActivatePush.textContent = 'Activar Alertas';
-        btnActivatePush.disabled = false;
-      }
-    });
-  } else if (pushBanner) {
-    // Si el navegador no soporta push, simplemente no mostramos el banner
-    pushBanner.remove();
+          showToast('🔔 ¡Alertas activadas exitosamente!', 'success');
+          pushBanner.classList.remove('slide-down');
+          setTimeout(() => {
+            pushBanner.style.display = 'none';
+            pushBanner.remove();
+          }, 500);
+
+        } catch (err) {
+          console.error('Error suscribiendo a push:', err);
+
+          if (Notification.permission === 'denied') {
+            // Ocultar banner verde, abrir banner amarillo bloqueado y disparar el modal
+            pushBanner.classList.remove('slide-down');
+            setTimeout(() => {
+              pushBanner.style.display = 'none';
+              blockedBanner.style.display = 'flex';
+              setTimeout(() => blockedBanner.classList.add('slide-down'), 100);
+              guideModal.style.display = 'flex'; // Pop modal instantly when they reject it live
+            }, 600);
+          } else {
+            showToast('❌ Ocurrió un error. Comprobá tu conexión e intentá de nuevo.', 'error');
+            btnActivatePush.textContent = 'Activar Alertas';
+            btnActivatePush.disabled = false;
+          }
+        }
+      });
+    }
+  } else {
+    // Navigate sin push
+    if (pushBanner) pushBanner.remove();
+    if (blockedBanner) blockedBanner.remove();
   }
 
   // Flyer Generator (Step 2: Kit de Marketing)
