@@ -81,7 +81,43 @@ export async function renderDashboard() {
 
     <!-- Dashboard Menu -->
     <div class="dashboard-menu">
+      <!-- 🚀 MARKETING PREMIUM SECTION (MOVED UP & REDESIGNED) -->
       <div class="section-header mt-8">
+        <h2 class="section-title" style="color: var(--warning); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.4rem;">🚀</span> Impulsá tu Perfil
+        </h2>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px;">
+        <div class="dashboard-menu-item" style="background:linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; border: none; box-shadow: 0 8px 20px rgba(255,107,107,0.4); transform: translateY(0); transition: transform 0.2s; margin-bottom: 0;" id="menu-promote-profile">
+          <div class="dashboard-menu-icon" style="background: rgba(255,255,255,0.25); color:white; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);">🚀</div>
+          <div class="dashboard-menu-text">
+            <div class="dashboard-menu-title" style="color: white; font-size: 1.05rem; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Promocionarme (+Puntos)</div>
+            <div class="dashboard-menu-desc" style="color: rgba(255,255,255,0.95); font-weight: 500;">Compartí tu perfil en redes y subí de ranking.</div>
+          </div>
+          <span class="dashboard-menu-arrow" style="color: white; opacity: 0.8; font-weight: bold;">→</span>
+        </div>
+
+        <div class="dashboard-menu-item" style="background:linear-gradient(135deg, #9333EA, #C084FC); color: white; border: none; box-shadow: 0 8px 20px rgba(147,51,234,0.4); margin-bottom: 0;" id="menu-generate-flyer">
+          <div class="dashboard-menu-icon" style="background: rgba(255,255,255,0.25); color:white; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);">🎨</div>
+          <div class="dashboard-menu-text">
+            <div class="dashboard-menu-title" style="color: white; font-size: 1.05rem; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Crear Flyer (Instagram)</div>
+            <div class="dashboard-menu-desc" style="color: rgba(255,255,255,0.95); font-weight: 500;">Imagen profesional para Historias o Reels.</div>
+          </div>
+          <span class="dashboard-menu-arrow" style="color: white; opacity: 0.8; font-weight: bold;">→</span>
+        </div>
+
+        <div class="dashboard-menu-item" style="background:linear-gradient(135deg, #00C853, #15E16A); color: white; border: none; box-shadow: 0 8px 20px rgba(0,200,83,0.4); margin-bottom: 0;" id="menu-referral">
+          <div class="dashboard-menu-icon" style="background: rgba(255,255,255,0.25); color:white; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);">🤝</div>
+          <div class="dashboard-menu-text">
+            <div class="dashboard-menu-title" style="color: white; font-size: 1.05rem; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Invitar a un colega (VIP)</div>
+            <div class="dashboard-menu-desc" style="color: rgba(255,255,255,0.95); font-weight: 500;">Ganá visibilidad VIP al invitar a otros profes.</div>
+          </div>
+          <span class="dashboard-menu-arrow" style="color: white; opacity: 0.8; font-weight: bold;">→</span>
+        </div>
+      </div>
+
+      <div class="section-header">
         <h2 class="section-title">Mi Panel</h2>
       </div>
 
@@ -121,36 +157,6 @@ export async function renderDashboard() {
         <span class="dashboard-menu-arrow">→</span>
       </div>
 
-      <div class="section-header mt-16">
-        <h2 class="section-title">🚀 Mi Marketing (Vuelo Pro)</h2>
-      </div>
-
-      <div class="dashboard-menu-item" style="background:linear-gradient(135deg,rgba(255,107,107,0.1),rgba(255,142,83,0.1));" id="menu-promote-profile">
-        <div class="dashboard-menu-icon" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:white;">🚀</div>
-        <div class="dashboard-menu-text">
-          <div class="dashboard-menu-title">Promocionarme (+Puntos)</div>
-          <div class="dashboard-menu-desc">Compartí tu perfil en WhatsApp o redes para subir de ranking.</div>
-        </div>
-        <span class="dashboard-menu-arrow">→</span>
-      </div>
-
-      <div class="dashboard-menu-item" style="background:linear-gradient(135deg,rgba(147,51,234,0.1),rgba(192,132,252,0.1));" id="menu-generate-flyer">
-        <div class="dashboard-menu-icon" style="background:linear-gradient(135deg,#9333EA,#C084FC);color:white;">🎨</div>
-        <div class="dashboard-menu-text">
-          <div class="dashboard-menu-title">Crear Flyer (Instagram)</div>
-          <div class="dashboard-menu-desc">Imágen lista para subir a tus Historias o Reels.</div>
-        </div>
-        <span class="dashboard-menu-arrow">→</span>
-      </div>
-
-      <div class="dashboard-menu-item" id="menu-referral">
-        <div class="dashboard-menu-icon" style="background:var(--accent);color:white;">🤝</div>
-        <div class="dashboard-menu-text">
-          <div class="dashboard-menu-title">Invitar a un colega (VIP)</div>
-          <div class="dashboard-menu-desc">Ganá visibilidad destacada invitando a otros profesionales.</div>
-        </div>
-        <span class="dashboard-menu-arrow">→</span>
-      </div>
 
       <div class="dashboard-menu-item" onclick="window.location.hash='/stats'" id="menu-stats">
         <div class="dashboard-menu-icon green">📊</div>
